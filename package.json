@@ -10,7 +10,8 @@
 		"Other"
 	],
 	"activationEvents": [
-        "onCommand:laravel-intellisense.helloWorld"
+		"onLanguage:php",
+		"onLanguage:blade"
 	],
 	"main": "./out/extension.js",
 	"contributes": {

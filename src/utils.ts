@@ -1,12 +1,23 @@
-import * as vscode from 'vscode';
+import { WorkspaceFolder, workspace } from 'vscode';
 
-export function projectPath(path:string): string {
-    console.log(vscode.workspace.workspaceFolders)
-    if (path[0] !== '/') {
-        path = '/' + path;
+export function activeWorkspace(): any {
+    if (!(workspace.workspaceFolders instanceof Array)) {
+        return;
     }
-    if (vscode.workspace.workspaceFolders instanceof Array && vscode.workspace.workspaceFolders.length > 0) {
-        return vscode.workspace.workspaceFolders[0].uri.fsPath+path;
+
+    if (workspace.workspaceFolders.length === 0) {
+        return;
     }
+
+    return workspace.workspaceFolders[0];
+}
+
+export function path(path: string): string {
+    let workspace = activeWorkspace();
+
+    if ('uri' in workspace) {
+        return workspace.uri.path + '/' + path;
+    }
+
     return "";
 }
