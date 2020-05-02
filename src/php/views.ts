@@ -33,12 +33,41 @@ export function getViews(): Promise<string> {
             return $views;
         }
 
+        function getViews($path, $filesystem, $parentDirectory = null, $deluminator = '.')
+        {
+            $views = [];
+
+            foreach ($filesystem->files($path) as $file) {
+                if (strpos($file->getBaseName(), '.blade.php')) {
+                    $fileName = str_replace('.blade.php', '', $file->getBaseName());
+
+                    $view = '';
+
+                    if ($parentDirectory) {
+                        $view = $parentDirectory . $deluminator;
+                    }
+
+                    $view .= $fileName;
+
+                    $views = array_merge($views, [$view]);
+                }
+            }
+
+            return array_merge($views, Illuminate\\Support\\Arr::flatten(getViewsFromDirectory($filesystem->directories($path), $filesystem)));
+        }
+
         $filesystem = new Illuminate\\Filesystem\\Filesystem;
 
         $views = [];
 
         foreach (app('view')->getFinder()->getPaths() as $path) {
-            $views = array_merge($views, Illuminate\\Support\\Arr::flatten(getViewsFromDirectory($filesystem->directories($path), $filesystem)));
+            $views = array_merge($views, getViews($path, $filesystem));
+        }
+
+        foreach (app('view')->getFinder()->getHints() as $namespace => $paths) {
+            foreach ($paths as $path) {
+                $views = array_merge($views, getViews($path, $filesystem, $namespace, '::'));
+            }
         }
 
         echo json_encode($views);
