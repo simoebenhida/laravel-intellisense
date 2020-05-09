@@ -11,7 +11,7 @@ import {
     workspace
 } from 'vscode';
 import { activeWorkspace } from "./utils";
-import { getViews } from "./php/views";
+import { getViews } from "./php/view";
 import Parser from "./parser";
 
 export default class ViewItemProvider implements CompletionItemProvider {
