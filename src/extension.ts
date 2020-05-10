@@ -9,11 +9,11 @@ export function activate(context: ExtensionContext) {
     return;
   }
 
-  // LaravelIdeHelper.generate();
+  LaravelIdeHelper.generate();
 
   context.subscriptions.push(languages.registerCompletionItemProvider(DOCUMENT_SELECTOR, new ModelItemProvider, ...TRIGGER_CHARACTERS));
 
-  // context.subscriptions.push(languages.registerCompletionItemProvider(DOCUMENT_SELECTOR, new ViewItemProvider, ...TRIGGER_CHARACTERS));
+  context.subscriptions.push(languages.registerCompletionItemProvider(DOCUMENT_SELECTOR, new ViewItemProvider, ...TRIGGER_CHARACTERS));
 }
 
 // this method is called when your extension is deactivated
