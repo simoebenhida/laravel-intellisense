@@ -1,35 +1,35 @@
 import * as vscode from "vscode";
 import { getModelAttributes } from "./php/model";
 import Parser from "./parser";
+import { isNull } from "util";
 
 export default class ModelItemProvider {
-  private timer: any = null;
-
   private attributes: any = {};
 
-  private watcher: any = null;
+  private line: any = null;
 
   constructor() {
-    this.timer = null;
     this.attributes = {};
-    this.watcher = null;
-    this.syncModel();
   }
 
-  provideCompletionItems(
+  async provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position,
     token: vscode.CancellationToken,
     context: vscode.CompletionContext
-  ): Array<vscode.CompletionItem> {
-
-    // console.log(document, position, token, context);
+  ) {
     let items: Array<vscode.CompletionItem> = [];
 
-    let hasModel = new Parser(document, position).hasModel();
+    let model = new Parser(document, position).hasModel();
 
-    if (!hasModel) {
+    if (isNull(model)) {
       return items;
+    }
+
+    if (isNull(this.line) || this.line !== position.line) {
+      this.line = position.line;
+
+      await this.syncModel(model);
     }
 
     for (let attribute of this.attributes) {
@@ -49,12 +49,10 @@ export default class ModelItemProvider {
     return items;
   }
 
-//   resolveCompletionItem(item: vscode.CompletionItem, token: vscode.CancellationToken): vscode.ProviderResult<vscode.CompletionItem> {
-//     console.log('item', item.kind, token);
-//   }
+  async syncModel(model: string) {
+    this.attributes = [];
 
-  syncModel() {
-    getModelAttributes().then((attributes) => {
+    await getModelAttributes(model).then((attributes: any) => {
       this.attributes = JSON.parse(attributes);
     });
   }

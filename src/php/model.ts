@@ -1,8 +1,8 @@
 import PHP from "./index";
 
-export function getModelAttributes() {
+export function getModelAttributes(model: string) {
   const script = `
-        $user = App\\User::first();
+        $user = ${model}::first();
         echo json_encode(array_keys($user->getAttributes()));
     `;
 

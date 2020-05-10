@@ -1,5 +1,11 @@
-import { TextDocument, Position, EvaluatableExpressionProvider, Hover } from "vscode";
-import ClassParser from './parser/ClassParser';
+import {
+  TextDocument,
+  Position,
+  EvaluatableExpressionProvider,
+  Hover,
+} from "vscode";
+import ModelParser from "./parser/ModelParser";
+import { isNull } from "util";
 
 export default class Parser {
   cachedParseFunction: any = null;
@@ -37,15 +43,16 @@ export default class Parser {
     });
   }
 
-  async hasModel() {
-    const classParser = new ClassParser(this.document, this.position);
+  hasModel() {
+    const modelParser = new ModelParser(this.document, this.position);
 
-    console.log(classParser.getClass());
+    const className = modelParser.getFullClassName();
 
-    return this.queryAliases.some((alias) => {
-      const text = this.document.lineAt(this.position).text;
-      return text.includes(alias);
-    });
+    if (isNull(className)) {
+      return null;
+    }
+
+    return className;
   }
 
   getDocumentCode() {
