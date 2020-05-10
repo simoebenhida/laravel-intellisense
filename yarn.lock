@@ -1115,6 +1115,11 @@ path-key@^2.0.1:
   resolved "https://registry.yarnpkg.com/path-key/-/path-key-2.0.1.tgz#411cadb574c5a140d3a4b1910d40d80cc9f40b40"
   integrity sha1-QRyttXTFoUDTpLGRDUDYDMn0C0A=
 
+php-parser@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/php-parser/-/php-parser-3.0.1.tgz#69ae957362717cfefbc58eb208d12e48dab2e809"
+  integrity sha512-m6CBPHOoMkzEHoXG0rhEg/VegSNemUNQepHnYtrRgTAh8rsqoO65KqQ32KJ5xe2iplhO0jdwd1UJ9Ea0yHsgYQ==
+
 picomatch@^2.0.4:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/picomatch/-/picomatch-2.2.2.tgz#21f333e9b6b8eaff02468f5146ea406d345f4dad"

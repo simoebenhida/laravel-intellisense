@@ -22,6 +22,8 @@ export default class ModelItemProvider {
     token: vscode.CancellationToken,
     context: vscode.CompletionContext
   ): Array<vscode.CompletionItem> {
+
+    // console.log(document, position, token, context);
     let items: Array<vscode.CompletionItem> = [];
 
     let hasModel = new Parser(document, position).hasModel();
@@ -46,6 +48,10 @@ export default class ModelItemProvider {
 
     return items;
   }
+
+//   resolveCompletionItem(item: vscode.CompletionItem, token: vscode.CancellationToken): vscode.ProviderResult<vscode.CompletionItem> {
+//     console.log('item', item.kind, token);
+//   }
 
   syncModel() {
     getModelAttributes().then((attributes) => {

@@ -1,4 +1,5 @@
-import { TextDocument, Position } from "vscode";
+import { TextDocument, Position, EvaluatableExpressionProvider, Hover } from "vscode";
+import ClassParser from './parser/ClassParser';
 
 export default class Parser {
   cachedParseFunction: any = null;
@@ -37,20 +38,10 @@ export default class Parser {
   }
 
   async hasModel() {
-    // const text = this.document.lineAt(this.position).text;
-    // const text = this.document.getText();
-    // var engine = require('php-parser');
-    // const parser = new engine({
-    //     parser: {
-    //         extractDoc: true,
-    //         php7: true
-    //     },
-    //     ast: {
-    //         withPositions: true
-    //     }
-    // });
-    // const tree = engine.parseEval(await this.getDocumentCode());
-    // console.log(tree);
+    const classParser = new ClassParser(this.document, this.position);
+
+    console.log(classParser.getClass());
+
     return this.queryAliases.some((alias) => {
       const text = this.document.lineAt(this.position).text;
       return text.includes(alias);
