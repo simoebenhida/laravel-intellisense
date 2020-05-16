@@ -110,6 +110,8 @@ export default class ModelParser {
 
     const tokens = this.tokens.slice(0, aliasToken[3]).reverse();
 
+    console.log(tokens);
+
     for (const token of tokens) {
       if (token[0] === "T_DOUBLE_COLON") {
         hasVariable = false;
@@ -127,6 +129,8 @@ export default class ModelParser {
         break;
       }
     }
+
+    // console.log(hasVariable, classNameTokens);
 
     if (!hasVariable) {
       return this.getClassNameFromTokens(classNameTokens);
@@ -147,12 +151,14 @@ export default class ModelParser {
     }
 
     if (isString(usedVariableTokenOrClassName)) {
-        return usedVariableTokenOrClassName;
+      return usedVariableTokenOrClassName;
     }
 
-
     return this.tokens.findIndex((token: Array<any>) => {
-        return token[1] === usedVariableTokenOrClassName[1] && token[0] === "T_VARIABLE";
+      return (
+        token[1] === usedVariableTokenOrClassName[1] &&
+        token[0] === "T_VARIABLE"
+      );
     });
   }
 
@@ -164,7 +170,7 @@ export default class ModelParser {
     const variableFirstIndexOrClassName = this.getUsedVariableFirstIndexOrClassName();
 
     if (isString(variableFirstIndexOrClassName)) {
-        return variableFirstIndexOrClassName;
+      return variableFirstIndexOrClassName;
     }
 
     if (isNull(variableFirstIndexOrClassName)) {
@@ -172,6 +178,8 @@ export default class ModelParser {
     }
 
     const tokens = this.tokens.slice(variableFirstIndexOrClassName + 1);
+
+    console.log(tokens);
 
     for (let i = 0; i < tokens.length; i++) {
       if (tokens[i] === "=") {
@@ -219,14 +227,16 @@ export default class ModelParser {
     const variableFirstIndexOrClassName = this.getUsedVariableFirstIndexOrClassName();
 
     if (isString(variableFirstIndexOrClassName)) {
-        return variableFirstIndexOrClassName;
+      return variableFirstIndexOrClassName;
     }
 
     if (isNull(variableFirstIndexOrClassName)) {
       return null;
     }
 
-    const tokens = this.tokens.slice(0, variableFirstIndexOrClassName).reverse();
+    const tokens = this.tokens
+      .slice(0, variableFirstIndexOrClassName)
+      .reverse();
 
     for (const token of tokens) {
       if (token[0] === "T_STRING" || token[0] === "T_NS_SEPARATOR") {

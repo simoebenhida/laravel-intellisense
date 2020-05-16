@@ -2,14 +2,13 @@ import * as vscode from "vscode";
 import { getModelAttributes } from "./php/model";
 import Parser from "./parser";
 import { isNull } from "util";
+import { getConfigElements } from "./php/config";
 
-export default class ModelItemProvider {
-  private attributes: any = {};
-
-  private model: string | null = null;
+export default class ConfigItemProvider {
+  private elements: any = null;
 
   constructor() {
-    this.attributes = {};
+      this.syncConfig();
   }
 
   async provideCompletionItems(
@@ -20,21 +19,15 @@ export default class ModelItemProvider {
   ) {
     let items: Array<vscode.CompletionItem> = [];
 
-    let model = new Parser(document, position).hasModel();
+    let hasConfig = new Parser(document, position).hasConfig();
 
-    if (isNull(model)) {
+    if (!hasConfig) {
       return items;
     }
-    console.log(model)
-    if (this.model !== model) {
-      this.model = model;
 
-      await this.syncModel();
-    }
-
-    for (let attribute of this.attributes) {
+    for (let element of this.elements) {
       const item = new vscode.CompletionItem(
-        attribute,
+        element,
         vscode.CompletionItemKind.Constant
       );
 
@@ -49,15 +42,9 @@ export default class ModelItemProvider {
     return items;
   }
 
-  async syncModel() {
-    this.attributes = [];
-
-    if (isNull(this.model)) {
-        return;
-    }
-
-    await getModelAttributes(this.model).then((attributes: any) => {
-      this.attributes = JSON.parse(attributes);
+  async syncConfig() {
+    await getConfigElements().then((elements) => {
+      this.elements = JSON.parse(elements);
     });
   }
 }

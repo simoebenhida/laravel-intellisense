@@ -3,6 +3,7 @@ import { hasArtisan, DOCUMENT_SELECTOR, TRIGGER_CHARACTERS } from "./laravel";
 import ViewItemProvider from "./ViewItemProvider";
 import ModelItemProvider from "./ModelItemProvider";
 import LaravelIdeHelper from "./php/laravelIdeHelper";
+import ConfigItemProvider from "./ConfigItemProvider";
 
 export function activate(context: ExtensionContext) {
   if (!hasArtisan()) {
@@ -14,6 +15,8 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(languages.registerCompletionItemProvider(DOCUMENT_SELECTOR, new ModelItemProvider, ...TRIGGER_CHARACTERS));
 
   context.subscriptions.push(languages.registerCompletionItemProvider(DOCUMENT_SELECTOR, new ViewItemProvider, ...TRIGGER_CHARACTERS));
+
+  context.subscriptions.push(languages.registerCompletionItemProvider(DOCUMENT_SELECTOR, new ConfigItemProvider, ...TRIGGER_CHARACTERS));
 }
 
 // this method is called when your extension is deactivated

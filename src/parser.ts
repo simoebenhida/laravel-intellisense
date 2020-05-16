@@ -23,7 +23,7 @@ export default class Parser {
 
   classes: Array<string> = ["Config", "Route", "Lang", "Validator", "View"];
 
-  queryAliases: Array<string> = ["->where", "::where"];
+  configAliases: Array<string> = ["config("];
 
   document: TextDocument;
 
@@ -53,6 +53,14 @@ export default class Parser {
     }
 
     return className;
+  }
+
+  hasConfig() {
+    return this.configAliases.some((alias) => {
+      const text = this.document.lineAt(this.position).text;
+
+      return text.includes(alias);
+    });
   }
 
   getDocumentCode() {
