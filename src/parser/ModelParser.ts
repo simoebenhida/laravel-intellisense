@@ -108,9 +108,12 @@ export default class ModelParser {
       return null;
     }
 
-    const tokens = this.tokens.slice(0, aliasToken[3]).reverse();
-
-    console.log(tokens);
+    const tokens = this.tokens
+      .slice(0, aliasToken[3])
+      .filter((token) => {
+        return token[0] !== "T_WHITESPACE" && token[0] !== "T_COMMENT";
+      })
+      .reverse();
 
     for (const token of tokens) {
       if (token[0] === "T_DOUBLE_COLON") {
@@ -121,24 +124,30 @@ export default class ModelParser {
         classNameTokens.push(token);
       }
 
-      if (
-        token[0] !== "T_STRING" &&
-        token[0] !== "T_WHITESPACE" &&
-        token[0] !== "T_DOUBLE_COLON"
-      ) {
+      if (token[0] !== "T_STRING" && token[0] !== "T_DOUBLE_COLON") {
         break;
       }
     }
-
-    // console.log(hasVariable, classNameTokens);
 
     if (!hasVariable) {
       return this.getClassNameFromTokens(classNameTokens);
     }
 
-    const usedVariableToken = tokens.find((token: Array<any>) => {
-      return token[0] === "T_VARIABLE";
-    });
+    let usedVariableToken: any = [];
+
+    for (let i = 0; i < tokens.length; i++) {
+      if (
+        tokens[i][0] === "T_VARIABLE" &&
+        (tokens[i + 1] === "{" ||
+          tokens[i + 1] === ";" ||
+          tokens[i + 1] === "=")
+      ) {
+        usedVariableToken = tokens[i];
+        break;
+      }
+    }
+
+    console.log(usedVariableToken);
 
     return usedVariableToken;
   }
@@ -155,11 +164,41 @@ export default class ModelParser {
     }
 
     return this.tokens.findIndex((token: Array<any>) => {
-      return (
-        token[1] === usedVariableTokenOrClassName[1] &&
-        token[0] === "T_VARIABLE"
-      );
+      if (
+        token[0] === "T_VARIABLE" &&
+        token[1] === usedVariableTokenOrClassName[1]
+      ) {
+        if (this.tokenLineHaveFunction(token)) {
+          return true;
+        }
+
+        if (this.tokenLineHasEquality(token)) {
+          return true;
+        }
+      }
+
+      return false;
     });
+  }
+
+  tokenLineHaveFunction(currentLineToken: any) {
+    return this.tokens
+      .filter((token) => {
+        return token[2] === currentLineToken[2];
+      })
+      .some((token) => {
+        return token[0] === "T_FUNCTION";
+      });
+  }
+
+  tokenLineHasEquality(currentLineToken: any) {
+    return this.tokens
+      .filter((token) => {
+        return token[2] === currentLineToken[2];
+      })
+      .some((token) => {
+        return token === "=";
+      });
   }
 
   getClassNameFromEquality() {
@@ -178,8 +217,6 @@ export default class ModelParser {
     }
 
     const tokens = this.tokens.slice(variableFirstIndexOrClassName + 1);
-
-    console.log(tokens);
 
     for (let i = 0; i < tokens.length; i++) {
       if (tokens[i] === "=") {
