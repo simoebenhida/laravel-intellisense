@@ -15,7 +15,9 @@ export default class ModelParser {
   }
 
   getFullClassName() {
-    const className = this.getClassName();
+    this.aliasToken = this.getAliasToken();
+
+    const className = this.getClassNameFromToken();
 
     if (isNull(className)) {
       return null;
@@ -51,12 +53,6 @@ export default class ModelParser {
     }
 
     return uses;
-  }
-
-  getClassName() {
-    this.aliasToken = this.getAliasToken();
-
-    return this.getClassNameFromToken();
   }
 
   getCurrentLineTokens() {
@@ -96,8 +92,6 @@ export default class ModelParser {
 
     let usedVariableToken: any = [];
 
-    let namespaceDoubleColonTokenIndex: any = null;
-
     if (isUndefined(this.aliasToken) || this.aliasToken.length < 3) {
       return null;
     }
@@ -109,7 +103,9 @@ export default class ModelParser {
       })
       .reverse();
 
+    //   console.log('start');
     for (let j = 0; j < tokens.length; j++) {
+        // console.log(tokens[j]);
       if (
         tokens[j][0] === "T_VARIABLE" &&
         (tokens[j + 1] === "{" ||
@@ -123,36 +119,73 @@ export default class ModelParser {
       }
 
       if (tokens[j][0] === "T_DOUBLE_COLON") {
-        namespaceDoubleColonTokenIndex = j;
+        const checkForDoubleColon = this.checkIfTheDoubleColonIsCorrect(
+          j,
+          tokens
+        );
 
-        hasVariable = false;
-        break;
-      }
-    }
+        if (checkForDoubleColon.isCorrectDoubleColon) {
+          classNameTokens = checkForDoubleColon.classNameTokens;
 
-    if (!hasVariable) {
-        const tokensFromDoubleColon = tokens.slice(namespaceDoubleColonTokenIndex + 1);
-
-      for (const token of tokensFromDoubleColon) {
-        if (
-          (token[0] === "T_STRING" || token[0] === "T_NS_SEPARATOR")
-        ) {
-          classNameTokens.push(token);
-        }
-
-        if (
-          token[0] !== "T_STRING" &&
-          token[0] !== "T_OBJECT_OPERATOR" &&
-          token[0] !== "T_NS_SEPARATOR"
-        ) {
+          hasVariable = false;
           break;
         }
       }
+    }
 
+    console.log('used', usedVariableToken, this.aliasToken);
+
+    if (!hasVariable) {
       return this.joinClassNameFromTokens(classNameTokens.reverse());
     }
 
     return usedVariableToken;
+  }
+
+  checkIfTheDoubleColonIsCorrect(
+    indexForDoubleColon: number,
+    tokens: Array<any>
+  ) {
+    let classNameTokens: Array<any> = [];
+
+    let isCorrectDoubleColon: boolean = false;
+
+    const tokensFromDoubleColon = tokens.slice(indexForDoubleColon + 1);
+
+    for (let i = 0; i < tokensFromDoubleColon.length; i++) {
+      if (
+        tokensFromDoubleColon[i][0] === "T_STRING" ||
+        tokensFromDoubleColon[i][0] === "T_NS_SEPARATOR"
+      ) {
+        classNameTokens.push(tokensFromDoubleColon[i]);
+      }
+
+      if (
+        tokensFromDoubleColon[i][0] !== "T_STRING" &&
+        tokensFromDoubleColon[i][0] !== "T_NS_SEPARATOR" &&
+        ((tokensFromDoubleColon[i][0] === "(" &&
+          tokensFromDoubleColon[i + 1][0] === "T_FUNCTION") ||
+          tokensFromDoubleColon[i][0] === "=" ||
+          tokensFromDoubleColon[i][0] === "{" ||
+          tokensFromDoubleColon[i][0] === ";" ||
+          tokensFromDoubleColon[i][0] === "T_OPEN_TAG")
+      ) {
+        isCorrectDoubleColon = true;
+      }
+
+      if (
+        tokensFromDoubleColon[i][0] !== "T_STRING" &&
+        tokensFromDoubleColon[i][0] !== "T_OBJECT_OPERATOR" &&
+        tokensFromDoubleColon[i][0] !== "T_NS_SEPARATOR"
+      ) {
+        break;
+      }
+    }
+
+    return {
+      isCorrectDoubleColon,
+      classNameTokens,
+    };
   }
 
   getUsedVariableFirstIndexOrClassName() {
@@ -215,6 +248,8 @@ export default class ModelParser {
 
   getClassNameFromToken(): any {
     const variableFirstIndexOrClassName = this.getUsedVariableFirstIndexOrClassName();
+
+    console.log(variableFirstIndexOrClassName);
 
     if (isString(variableFirstIndexOrClassName)) {
       return variableFirstIndexOrClassName;
@@ -303,7 +338,7 @@ export default class ModelParser {
 
     if (classNameTokens.length === 0) {
       this.aliasToken = variableToken;
-
+    console.log(variableToken);
       return this.getClassNameFromToken();
     }
 

@@ -48,6 +48,8 @@ export default class Parser {
 
     const className = modelParser.getFullClassName();
 
+    console.log(className);
+
     if (isNull(className)) {
       return null;
     }

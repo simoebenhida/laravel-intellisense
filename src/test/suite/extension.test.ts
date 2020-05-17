@@ -11,7 +11,7 @@ suite("Model Parser Test", () => {
   test("it can get model from inline model", () => {
     const tokens = phpParserTokens(`
             <?php
-            $user = App\\User::where('');
+            App\\User::where('');
         `);
 
     const modelParser = new ModelParser(tokens, new vscode.Position(2, 39));
@@ -68,7 +68,6 @@ suite("Model Parser Test", () => {
     assert.equal("App\\User", className);
   });
 
-
   test("it can get model from closure", () => {
     const tokens = phpParserTokens(`
         <?php
@@ -83,6 +82,47 @@ suite("Model Parser Test", () => {
     `);
 
     const modelParser = new ModelParser(tokens, new vscode.Position(7, 34));
+
+    const className = modelParser.getFullClassName();
+
+    assert.equal("App\\User", className);
+  });
+
+  test("it can get model from closure that has a static call", () => {
+    const tokens = phpParserTokens(`
+        <?php
+            use App\\User;
+
+            Route::get('/', function (User $user) {
+                $user->when(Arr::get($data, 'example'), function ($query) {
+                    $query->where($example, '')
+                        ->where('')
+                });
+            });
+    `);
+
+    const modelParser = new ModelParser(tokens, new vscode.Position(7, 34));
+
+    const className = modelParser.getFullClassName();
+
+    assert.equal("App\\User", className);
+  });
+
+  test("it can get model from complex closure", () => {
+    const tokens = phpParserTokens(`
+        <?php
+        use App\\User;
+        use App\\Post;
+
+        $query = Post::query();
+
+        $query = User::query()
+            ->when($this->term, function ($query) {
+                $query->where('');
+            })
+    `);
+
+    const modelParser = new ModelParser(tokens, new vscode.Position(9, 32));
 
     const className = modelParser.getFullClassName();
 
