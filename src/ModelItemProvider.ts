@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
 import { getModelAttributes } from "./php/model";
-import Parser from "./parser";
+import Parser from "./parser/index";
 import { isNull } from "util";
 
 export default class ModelItemProvider {
@@ -25,7 +25,7 @@ export default class ModelItemProvider {
     if (isNull(model)) {
       return items;
     }
-    console.log(model)
+
     if (this.model !== model) {
       this.model = model;
 

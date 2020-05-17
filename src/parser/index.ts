@@ -1,11 +1,7 @@
-import {
-  TextDocument,
-  Position,
-  EvaluatableExpressionProvider,
-  Hover,
-} from "vscode";
-import ModelParser from "./parser/ModelParser";
+import { TextDocument, Position } from "vscode";
+import ModelParser from "./ModelParser";
 import { isNull } from "util";
+import { phpParserTokens } from "../utils";
 
 export default class Parser {
   cachedParseFunction: any = null;
@@ -35,6 +31,10 @@ export default class Parser {
     this.position = position;
   }
 
+  parseTokens() {
+    return phpParserTokens(this.document.getText());
+  }
+
   hasView() {
     return this.viewAliases.some((alias: string) => {
       const text = this.document.lineAt(this.position).text;
@@ -43,31 +43,23 @@ export default class Parser {
     });
   }
 
-//   hasModel() {
-//     const modelParser = new ModelParser(this.document, this.position);
+  hasModel() {
+    const modelParser = new ModelParser(this.parseTokens(), this.position);
 
-//     const className = modelParser.getFullClassName();
+    const className = modelParser.getFullClassName();
 
-//     if (isNull(className)) {
-//       return null;
-//     }
+    if (isNull(className)) {
+      return null;
+    }
 
-//     return className;
-//   }
+    return className;
+  }
 
   hasConfig() {
     return this.configAliases.some((alias) => {
       const text = this.document.lineAt(this.position).text;
 
       return text.includes(alias);
-    });
-  }
-
-  getDocumentCode() {
-    return new Promise((resolve, reject) => {
-      if (this.document) {
-        resolve(this.document.getText());
-      }
     });
   }
 }
