@@ -103,9 +103,7 @@ export default class ModelParser {
       })
       .reverse();
 
-    //   console.log('start');
     for (let j = 0; j < tokens.length; j++) {
-        // console.log(tokens[j]);
       if (
         tokens[j][0] === "T_VARIABLE" &&
         (tokens[j + 1] === "{" ||
@@ -132,8 +130,6 @@ export default class ModelParser {
         }
       }
     }
-
-    console.log('used', usedVariableToken, this.aliasToken);
 
     if (!hasVariable) {
       return this.joinClassNameFromTokens(classNameTokens.reverse());
@@ -201,24 +197,31 @@ export default class ModelParser {
 
     let isInsideFunctionParams: boolean = false;
 
-    const variableToken = this.tokens.find((token: Array<any>) => {
-      if (
-        token[0] === "T_VARIABLE" &&
-        token[1] === usedVariableTokenOrClassName[1]
-      ) {
-        if (this.tokenLineHaveFunction(token)) {
-          isInsideFunctionParams = true;
+    console.log(usedVariableTokenOrClassName);
 
-          return true;
+    const variableToken = this.tokens
+      .slice(0, this.aliasToken[3])
+      .reverse()
+      .find((token: Array<any>) => {
+        if (
+          token[0] === "T_VARIABLE" &&
+          token[1] === usedVariableTokenOrClassName[1]
+        ) {
+          if (this.tokenLineHaveFunctionWithIndependencyInjection(token)) {
+            isInsideFunctionParams = true;
+
+            return true;
+          }
+
+          if (this.tokenLineHasEquality(token)) {
+            return true;
+          }
         }
 
-        if (this.tokenLineHasEquality(token)) {
-          return true;
-        }
-      }
+        return false;
+      });
 
-      return false;
-    });
+      console.log(variableToken);
 
     return {
       variableToken,
@@ -226,17 +229,49 @@ export default class ModelParser {
     };
   }
 
-  tokenLineHaveFunction(currentLineToken: any) {
-    return this.tokens
+  tokenLineHaveFunctionWithIndependencyInjection(currentLineToken: any) {
+    let hasIndependency: boolean = false;
+
+    let hasFunction: boolean = false;
+
+    const tokens = this.tokens
+      .slice(0, currentLineToken[3])
       .filter((token) => {
-        return token[2] === currentLineToken[2];
+        return (
+          token[0] !== "T_WHITESPACE" &&
+          token[0] !== "T_COMMENT"
+        );
       })
-      .some((token) => {
-        return token[0] === "T_FUNCTION";
-      });
+      .reverse();
+
+    console.log(tokens);
+    for (const token of tokens) {
+      if (token[0] === "T_STRING") {
+        hasIndependency = true;
+      }
+
+      if (token[0] === "T_FUNCTION") {
+        hasFunction = true;
+      }
+
+      if (token[0] !== "T_STRING" && token[0] !== "T_FUNCTION") {
+        break;
+      }
+    }
+
+    console.log(hasFunction, hasIndependency);
+    return hasFunction && hasIndependency;
   }
 
   tokenLineHasEquality(currentLineToken: any) {
+    //   for (const token of this.tokens) {
+
+    //   }
+
+    // CHECK for variable equality
+
+    // Loop over and over on closure if we don't find dependency injection
+
     return this.tokens
       .filter((token) => {
         return token[2] === currentLineToken[2];
@@ -338,7 +373,7 @@ export default class ModelParser {
 
     if (classNameTokens.length === 0) {
       this.aliasToken = variableToken;
-    console.log(variableToken);
+
       return this.getClassNameFromToken();
     }
 
