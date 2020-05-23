@@ -22,9 +22,9 @@ export default class ModelItemProvider {
 
     let model = new Parser(document, position).hasModel();
 
-    if (isNull(model)) {
-      return items;
-    }
+    // if (isNull(model)) {
+    //   return items;
+    // }
 
     if (this.model !== model) {
       this.model = model;

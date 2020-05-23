@@ -1,5 +1,5 @@
 import { TextDocument, Position } from "vscode";
-import { isUndefined, isNull, isArray, isString } from "util";
+import { isUndefined, isNull, isArray, isString, isObject } from "util";
 
 export default class ModelParser {
   tokens: Array<any>;
@@ -55,7 +55,7 @@ export default class ModelParser {
     return uses;
   }
 
-  getCurrentLineTokens() {
+  getCurrentLineTokens(): Array<any> {
     return this.tokens
       .filter((token: Array<any>) => {
         return token[2] === this.position.line + 1;
@@ -80,28 +80,47 @@ export default class ModelParser {
       "qualifyColumn",
     ];
 
-    return this.getCurrentLineTokens().find((token: Array<any>) => {
-      return queryAliases.includes(token[1]);
-    });
+    console.log(this.getCurrentLineTokens());
+
+    let aliasToken: Array<any> = [];
+
+    const lineTokens = this.getCurrentLineTokens();
+
+    lineTokens.shift();
+
+    for (const token of lineTokens) {
+      if (token[0] === "T_STRING") {
+        aliasToken = token;
+
+        break;
+      }
+
+      if (token[0] !== "T_STRING") {
+        break;
+      }
+    }
+
+    return aliasToken;
   }
 
-  getUsedVariableTokenOrClassName() {
+  getUsedVariableTokenOrClassName(
+    aliasToken: Array<any> = []
+  ): Array<any> | null | string {
     let classNameTokens: Array<any> = [];
 
     let hasVariable = true;
 
     let usedVariableToken: any = [];
 
-    if (isUndefined(this.aliasToken) || this.aliasToken.length < 3) {
+    if (aliasToken.length === 0) {
+      aliasToken = this.aliasToken;
+    }
+
+    if (isUndefined(aliasToken) || aliasToken.length < 3) {
       return null;
     }
 
-    const tokens = this.tokens
-      .slice(0, this.aliasToken[3])
-      .filter((token) => {
-        return token[0] !== "T_WHITESPACE" && token[0] !== "T_COMMENT";
-      })
-      .reverse();
+    const tokens = this.tokens.slice(0, aliasToken[3]).reverse();
 
     for (let j = 0; j < tokens.length; j++) {
       if (
@@ -184,8 +203,21 @@ export default class ModelParser {
     };
   }
 
-  getUsedVariableFirstIndexOrClassName() {
-    const usedVariableTokenOrClassName = this.getUsedVariableTokenOrClassName();
+  getUsedVariableFirstIndexOrClassName(
+    parentTokens: Array<any> = [],
+    aliasToken: Array<any> = []
+  ): any {
+    if (parentTokens.length === 0) {
+      parentTokens = this.tokens;
+    }
+
+    if (aliasToken.length === 0) {
+      aliasToken = this.aliasToken;
+    }
+
+    const usedVariableTokenOrClassName = this.getUsedVariableTokenOrClassName(
+      aliasToken
+    );
 
     if (isNull(usedVariableTokenOrClassName)) {
       return null;
@@ -197,31 +229,37 @@ export default class ModelParser {
 
     let isInsideFunctionParams: boolean = false;
 
-    console.log(usedVariableTokenOrClassName);
+    const tokens: Array<any> = parentTokens.slice(0, aliasToken[3]).reverse();
 
-    const variableToken = this.tokens
-      .slice(0, this.aliasToken[3])
-      .reverse()
-      .find((token: Array<any>) => {
-        if (
-          token[0] === "T_VARIABLE" &&
-          token[1] === usedVariableTokenOrClassName[1]
-        ) {
-          if (this.tokenLineHaveFunctionWithIndependencyInjection(token)) {
-            isInsideFunctionParams = true;
+    let variableToken: Array<any> | string = [];
 
-            return true;
-          }
+    for (const token of tokens) {
+      if (
+        token[0] === "T_VARIABLE" &&
+        token[1] === usedVariableTokenOrClassName[1]
+      ) {
+        const tokenHasEquality = this.tokenLineHasEquality(token, token[3]);
 
-          if (this.tokenLineHasEquality(token)) {
-            return true;
-          }
+        if (isString(tokenHasEquality)) {
+          variableToken = tokenHasEquality;
+          break;
         }
 
-        return false;
-      });
+        if (tokenHasEquality.variableToken.length > 0) {
+          variableToken = tokenHasEquality.variableToken;
+          isInsideFunctionParams = tokenHasEquality.isInsideFunctionParams;
+          break;
+        }
+      }
+    }
 
-      console.log(variableToken);
+    if (isString(variableToken)) {
+      return variableToken;
+    }
+
+    if (variableToken.length === 0) {
+      return null;
+    }
 
     return {
       variableToken,
@@ -229,62 +267,57 @@ export default class ModelParser {
     };
   }
 
-  tokenLineHaveFunctionWithIndependencyInjection(currentLineToken: any) {
-    let hasIndependency: boolean = false;
+  tokenLineHasEquality(variableToken: any, index: number): any {
+    const tokens = this.tokens
+      .slice(0, index)
+      .filter((token) => isArray(token))
+      .reverse();
+
+    let hasDependency: boolean = false;
 
     let hasFunction: boolean = false;
 
-    const tokens = this.tokens
-      .slice(0, currentLineToken[3])
-      .filter((token) => {
-        return (
-          token[0] !== "T_WHITESPACE" &&
-          token[0] !== "T_COMMENT"
-        );
-      })
-      .reverse();
-
-    console.log(tokens);
     for (const token of tokens) {
       if (token[0] === "T_STRING") {
-        hasIndependency = true;
+        hasDependency = true;
+        break;
       }
 
       if (token[0] === "T_FUNCTION") {
         hasFunction = true;
+        break;
       }
 
-      if (token[0] !== "T_STRING" && token[0] !== "T_FUNCTION") {
+      if (token[0] !== "T_STRING" || token[0] !== "T_FUNCTION") {
         break;
       }
     }
 
-    console.log(hasFunction, hasIndependency);
-    return hasFunction && hasIndependency;
+    if (hasDependency) {
+      return {
+        variableToken,
+        isInsideFunctionParams: true,
+      };
+    }
+
+    if (!hasFunction) {
+      return {
+        variableToken: [],
+        isInsideFunctionParams: false,
+      };
+    }
+
+    return this.getUsedVariableFirstIndexOrClassName(tokens, variableToken);
   }
 
-  tokenLineHasEquality(currentLineToken: any) {
-    //   for (const token of this.tokens) {
-
-    //   }
-
-    // CHECK for variable equality
-
-    // Loop over and over on closure if we don't find dependency injection
-
-    return this.tokens
-      .filter((token) => {
-        return token[2] === currentLineToken[2];
-      })
-      .some((token) => {
-        return token === "=";
-      });
-  }
-
-  getClassNameFromToken(): any {
-    const variableFirstIndexOrClassName = this.getUsedVariableFirstIndexOrClassName();
-
-    console.log(variableFirstIndexOrClassName);
+  getClassNameFromToken(
+    parentTokens: Array<any> = [],
+    aliasToken: Array<any> = []
+  ): string | null {
+    const variableFirstIndexOrClassName = this.getUsedVariableFirstIndexOrClassName(
+      parentTokens,
+      aliasToken
+    );
 
     if (isString(variableFirstIndexOrClassName)) {
       return variableFirstIndexOrClassName;
@@ -303,7 +336,7 @@ export default class ModelParser {
     return this.getClassNameFromEquality(variableToken);
   }
 
-  getClassNameFromEquality(variableToken: any) {
+  getClassNameFromEquality(variableToken: any): string | null {
     let classNameTokens: Array<any> = [];
 
     let equalityIndex = null;
@@ -339,7 +372,6 @@ export default class ModelParser {
       }
 
       if (
-        tokensWithEquality[i][0] !== "T_WHITESPACE" &&
         tokensWithEquality[i][0] !== "T_STRING" &&
         tokensWithEquality[i][0] !== "T_NS_SEPARATOR"
       ) {
@@ -350,7 +382,7 @@ export default class ModelParser {
     return this.joinClassNameFromTokens(classNameTokens);
   }
 
-  getClassNameFromDependencyInjection(variableToken: any): any {
+  getClassNameFromDependencyInjection(variableToken: any): string | null {
     let classNameTokens: Array<any> = [];
 
     const tokens = this.tokens.slice(0, variableToken[3]).reverse();
@@ -360,11 +392,7 @@ export default class ModelParser {
         classNameTokens.push(token);
       }
 
-      if (
-        token[0] !== "T_WHITESPACE" &&
-        token[0] !== "T_STRING" &&
-        token[0] !== "T_NS_SEPARATOR"
-      ) {
+      if (token[0] !== "T_STRING" && token[0] !== "T_NS_SEPARATOR") {
         break;
       }
     }
@@ -372,15 +400,13 @@ export default class ModelParser {
     classNameTokens = classNameTokens.reverse();
 
     if (classNameTokens.length === 0) {
-      this.aliasToken = variableToken;
-
-      return this.getClassNameFromToken();
+      return this.getClassNameFromToken(tokens, variableToken);
     }
 
     return this.joinClassNameFromTokens(classNameTokens);
   }
 
-  joinClassNameFromTokens(tokens: Array<any>) {
+  joinClassNameFromTokens(tokens: Array<any>): string {
     return tokens
       .map((token) => {
         return token[1];

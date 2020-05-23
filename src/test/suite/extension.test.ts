@@ -8,85 +8,85 @@ import ModelParser from "./../../parser/ModelParser";
 import { phpParserTokens } from "../../utils";
 
 suite("Model Parser Test", () => {
-//   test("it can get model from inline model", () => {
-//     const tokens = phpParserTokens(`
-//             <?php
-//             App\\User::where('');
-//         `);
+  test("it can get model from inline model", () => {
+    const tokens = phpParserTokens(`
+            <?php
+            App\\User::where('');
+        `);
 
-//     const modelParser = new ModelParser(tokens, new vscode.Position(2, 39));
+    const modelParser = new ModelParser(tokens, new vscode.Position(2, 39));
 
-//     const className = modelParser.getFullClassName();
+    const className = modelParser.getFullClassName();
 
-//     assert.equal("App\\User", className);
-//   });
+    assert.equal("App\\User", className);
+  });
 
-//   test("it can get model without namespace inline", () => {
-//     const tokens = phpParserTokens(`
-//             <?php
-//             use App\\User;
+  test("it can get model without namespace inline", () => {
+    const tokens = phpParserTokens(`
+            <?php
+            use App\\User;
 
-//             $user = User::where('');
-//         `);
+            $user = User::where('');
+        `);
 
-//     const modelParser = new ModelParser(tokens, new vscode.Position(4, 34));
+    const modelParser = new ModelParser(tokens, new vscode.Position(4, 34));
 
-//     const className = modelParser.getFullClassName();
+    const className = modelParser.getFullClassName();
 
-//     assert.equal("App\\User", className);
-//   });
+    assert.equal("App\\User", className);
+  });
 
-//   test("it can get model when multiple query conditions are before", () => {
-//     const tokens = phpParserTokens(`
-//             <?php
-//             use App\\User;
+  test("it can get model when multiple query conditions are before", () => {
+    const tokens = phpParserTokens(`
+            <?php
+            use App\\User;
 
-//             $user = User::where('name', $name)->where('');
-//         `);
+            $user = User::where('name', $name)->where('');
+        `);
 
-//     const modelParser = new ModelParser(tokens, new vscode.Position(4, 56));
+    const modelParser = new ModelParser(tokens, new vscode.Position(4, 56));
 
-//     const className = modelParser.getFullClassName();
+    const className = modelParser.getFullClassName();
 
-//     assert.equal("App\\User", className);
-//   });
+    assert.equal("App\\User", className);
+  });
 
-//   test("it can get model from dependency injection", () => {
-//     const tokens = phpParserTokens(`
-//         <?php
-//             use App\\User;
+  test("it can get model from dependency injection", () => {
+    const tokens = phpParserTokens(`
+        <?php
+            use App\\User;
 
-//             Route::get('/', function (User $user) {
-//                 $user->where('')
-//             });
-//     `);
+            Route::get('/', function (User $user) {
+                $user->where('')
+            });
+    `);
 
-//     const modelParser = new ModelParser(tokens, new vscode.Position(5, 31));
+    const modelParser = new ModelParser(tokens, new vscode.Position(5, 31));
 
-//     const className = modelParser.getFullClassName();
+    const className = modelParser.getFullClassName();
 
-//     assert.equal("App\\User", className);
-//   });
+    assert.equal("App\\User", className);
+  });
 
-//   test("it can get model from closure", () => {
-//     const tokens = phpParserTokens(`
-//         <?php
-//             use App\\User;
+  test("it can get model from closure", () => {
+    const tokens = phpParserTokens(`
+        <?php
+            use App\\User;
 
-//             Route::get('/', function (User $user) {
-//                 $user->when(true, function ($query) {
-//                     $query->where($example, '')
-//                         ->where('')
-//                 });
-//             });
-//     `);
+            Route::get('/', function (User $user) {
+                $user->when(true, function ($query) {
+                    $query->where($example, '')
+                        ->where('')
+                });
+            });
+    `);
 
-//     const modelParser = new ModelParser(tokens, new vscode.Position(7, 34));
+    const modelParser = new ModelParser(tokens, new vscode.Position(7, 34));
 
-//     const className = modelParser.getFullClassName();
+    const className = modelParser.getFullClassName();
 
-//     assert.equal("App\\User", className);
-//   });
+    assert.equal("App\\User", className);
+  });
 
   test("it can get model from closure that has a static call", () => {
     const tokens = phpParserTokens(`
@@ -108,24 +108,24 @@ suite("Model Parser Test", () => {
     assert.equal("App\\User", className);
   });
 
-//   test("it can get model from complex closure", () => {
-//     const tokens = phpParserTokens(`
-//         <?php
-//         use App\\User;
-//         use App\\Post;
+  test("it can get model from complex closure", () => {
+    const tokens = phpParserTokens(`
+        <?php
+        use App\\User;
+        use App\\Post;
 
-//         $query = Post::query();
+        $query = Post::query();
 
-//         $query = User::query()
-//             ->when($this->term, function ($query) {
-//                 $query->where('');
-//             })
-//     `);
+        $query = User::query()
+            ->when($this->term, function ($query) {
+                $query->where('');
+            })
+    `);
 
-//     const modelParser = new ModelParser(tokens, new vscode.Position(9, 32));
+    const modelParser = new ModelParser(tokens, new vscode.Position(9, 32));
 
-//     const className = modelParser.getFullClassName();
+    const className = modelParser.getFullClassName();
 
-//     assert.equal("App\\User", className);
-//   });
+    assert.equal("App\\User", className);
+  });
 });

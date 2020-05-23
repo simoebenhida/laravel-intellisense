@@ -38,6 +38,9 @@ export function phpParserTokens(document: string) {
 
   return parser
     .tokenGetAll(document)
+    .filter((token: Array<any>) => {
+        return token[0] !== "T_WHITESPACE" && token[0] !== "T_COMMENT" && token[0] !== "T_INLINE_HTML";
+    })
     .map((token: Array<any>, index: number) => {
       if (isArray(token)) {
         return [...token, index];
