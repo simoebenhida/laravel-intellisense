@@ -22,9 +22,9 @@ export default class ModelItemProvider {
 
     let model = new Parser(document, position).hasModel();
 
-    // if (isNull(model)) {
-    //   return items;
-    // }
+    if (isNull(model)) {
+      return items;
+    }
 
     if (this.model !== model) {
       this.model = model;
@@ -53,7 +53,7 @@ export default class ModelItemProvider {
     this.attributes = [];
 
     if (isNull(this.model)) {
-        return;
+      return;
     }
 
     await getModelAttributes(this.model).then((attributes: any) => {
