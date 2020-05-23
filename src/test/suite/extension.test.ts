@@ -128,4 +128,24 @@ suite("Model Parser Test", () => {
 
     assert.equal("App\\User", className);
   });
+
+  test("it can get multiple models", () => {
+    const tokens = phpParserTokens(`
+        <?php
+        use App\\User;
+        use App\\Post;
+
+        Route::get('/', function (User $user, Post $post) {
+            $user->where('name', 'name')->where('email', 'email')->get();
+
+            $post->where('')
+        });
+    `);
+
+    const modelParser = new ModelParser(tokens, new vscode.Position(8, 27));
+
+    const className = modelParser.getFullClassName();
+
+    assert.equal("App\\Post", className);
+  });
 });

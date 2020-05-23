@@ -49,3 +49,25 @@ export function phpParserTokens(document: string) {
       return token;
     });
 }
+
+// <?php
+
+// use App\User;
+// use App\Post;
+
+// Route::get('/', function (User $user, Post $post) {
+//     $user->where('')->where('')
+
+//     $user->firstWhere('name', 'John');
+
+//     $post->where('')
+// });
+
+// Route::get('/', function () {
+//     $user = User::where('');
+
+//     $user->when(true, function ($query) {
+//         $query->where('')
+//     });
+// });
+

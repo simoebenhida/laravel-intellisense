@@ -80,16 +80,18 @@ export default class ModelParser {
       "qualifyColumn",
     ];
 
-    console.log(this.getCurrentLineTokens());
-
     let aliasToken: Array<any> = [];
 
     const lineTokens = this.getCurrentLineTokens();
 
-    lineTokens.shift();
+    const firstToken = lineTokens.shift();
+
+    if (firstToken[0] !== "T_CONSTANT_ENCAPSED_STRING" || firstToken[1] !== "''") {
+      return aliasToken;
+    }
 
     for (const token of lineTokens) {
-      if (token[0] === "T_STRING") {
+      if (token[0] === "T_STRING" && queryAliases.includes(token[1])) {
         aliasToken = token;
 
         break;
@@ -127,6 +129,7 @@ export default class ModelParser {
         tokens[j][0] === "T_VARIABLE" &&
         (tokens[j + 1] === "{" ||
           tokens[j + 1] === ";" ||
+          tokens[j + 1] === ")" ||
           tokens[j + 1] === "=")
       ) {
         usedVariableToken = tokens[j];
@@ -182,6 +185,7 @@ export default class ModelParser {
           tokensFromDoubleColon[i + 1][0] === "T_FUNCTION") ||
           tokensFromDoubleColon[i][0] === "=" ||
           tokensFromDoubleColon[i][0] === "{" ||
+          tokensFromDoubleColon[i][0] === ")" ||
           tokensFromDoubleColon[i][0] === ";" ||
           tokensFromDoubleColon[i][0] === "T_OPEN_TAG")
       ) {
@@ -238,16 +242,18 @@ export default class ModelParser {
         token[0] === "T_VARIABLE" &&
         token[1] === usedVariableTokenOrClassName[1]
       ) {
-        const tokenHasEquality = this.tokenLineHasEquality(token, token[3]);
+        const firstVariableToken = this.getFirstVariableToken(token);
 
-        if (isString(tokenHasEquality)) {
-          variableToken = tokenHasEquality;
+        if (isString(firstVariableToken)) {
+          variableToken = firstVariableToken;
+
           break;
         }
 
-        if (tokenHasEquality.variableToken.length > 0) {
-          variableToken = tokenHasEquality.variableToken;
-          isInsideFunctionParams = tokenHasEquality.isInsideFunctionParams;
+        if (firstVariableToken.variableToken.length > 0) {
+          variableToken = firstVariableToken.variableToken;
+          isInsideFunctionParams = firstVariableToken.isInsideFunctionParams;
+
           break;
         }
       }
@@ -267,11 +273,8 @@ export default class ModelParser {
     };
   }
 
-  tokenLineHasEquality(variableToken: any, index: number): any {
-    const tokens = this.tokens
-      .slice(0, index)
-      .filter((token) => isArray(token))
-      .reverse();
+  getFirstVariableToken(variableToken: any): any {
+    const tokens = this.tokens.slice(0, variableToken[3]).reverse();
 
     let hasDependency: boolean = false;
 
@@ -288,7 +291,7 @@ export default class ModelParser {
         break;
       }
 
-      if (token[0] !== "T_STRING" || token[0] !== "T_FUNCTION") {
+      if (token === ";" || token === "{" || token === ")") {
         break;
       }
     }

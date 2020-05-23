@@ -8,6 +8,8 @@ export default class LaravelIdeHelper {
 
   static workspaceEdit: vscode.WorkspaceEdit = new vscode.WorkspaceEdit();
 
+  static fileName: string = "_ide_helper.php";
+
   static generate() {
     if (this.exists()) {
       return;
@@ -20,6 +22,8 @@ export default class LaravelIdeHelper {
     vscode.workspace.applyEdit(this.workspaceEdit).then(() => {
       this.InsertContent(Uri);
     });
+
+    this.insertToGitignore();
   }
 
   static exists() {
@@ -38,15 +42,41 @@ export default class LaravelIdeHelper {
     vscode.workspace.openTextDocument(Uri).then((document) => {
       document.save();
     });
+  }
 
-    // check if exists on .gitignore else add it to .gitignore
+  static insertToGitignore() {
+    const Uri = this.getGitignoreUri();
+
+    let lastLineIndex = 0;
+
+    vscode.workspace.openTextDocument(Uri).then((document) => {
+      if (document.getText().includes(this.fileName)) {
+        return;
+      }
+
+      lastLineIndex = document.lineCount - 1;
+
+      this.workspaceEdit.insert(
+        Uri,
+        new vscode.Position(lastLineIndex, 0),
+        this.fileName
+      );
+
+      vscode.workspace.applyEdit(this.workspaceEdit).then((response) => {
+        document.save();
+      });
+    });
   }
 
   static getFileUri() {
     return vscode.Uri.file(this.getIdeHelperPath());
   }
 
+  static getGitignoreUri() {
+    return vscode.Uri.file(path(".gitignore"));
+  }
+
   static getIdeHelperPath() {
-    return path("_ide_helper.php");
+    return path(this.fileName);
   }
 }

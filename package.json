@@ -10,15 +10,14 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onLanguage:php",
-		"onLanguage:blade"
+		"*"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "laravel-intellisense.helloWorld",
-				"title": "Hello World"
+				"command": "generate_ide_helper",
+				"title": "Generate Ide Helper"
 			}
 		]
 	},
