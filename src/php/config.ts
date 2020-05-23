@@ -18,12 +18,16 @@ export function getConfigElements() {
                     if ($alias) {
                         $alias = $alias .'.';
                     }
+                    if (! is_string($index)) {
+                        return;
+                    }
 
                     $alias .= $index;
 
                     if (is_array($keys)) {
                         return $this->transform($keys, $alias);
                     } else {
+                        // var_dump($alias);
                         $this->items->push($alias);
 
                         return $keys;
@@ -34,7 +38,7 @@ export function getConfigElements() {
             public function all(): array
             {
                 return $this->items->filter(function ($config, $key) {
-                    return strpos($key, 'app.providers') === false;
+                    return strpos($config, 'app.providers') === false && strpos($config, 'filesystems.links') === false;
                 })->toArray();
             }
         }

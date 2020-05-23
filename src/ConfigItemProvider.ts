@@ -44,7 +44,7 @@ export default class ConfigItemProvider {
 
   async syncConfig() {
     await getConfigElements().then((elements) => {
-      this.elements = JSON.parse(elements);
+      this.elements = Object.values(JSON.parse(elements));
     });
   }
 }
