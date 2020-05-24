@@ -119,7 +119,6 @@ export function getResourceAliasToken(tokens: Array<any>, position: Position) {
       lineTokens[j][0] === "T_OBJECT_OPERATOR" &&
       lineTokens[j + 1][1] === "$this"
     ) {
-      console.log(lineTokens);
       break;
     }
 
