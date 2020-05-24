@@ -68,7 +68,7 @@ export function getEloquentAliasToken(
     .reverse();
 
   for (const token of lineTokens) {
-    if (token[0] === "T_OBJECT_OPERATOR") {
+    if (token[0] === "T_OBJECT_OPERATOR" || token[0] === "T_DOUBLE_ARROW") {
       break;
     }
 
@@ -101,6 +101,33 @@ export function getResourceAliasToken(tokens: Array<any>, position: Position) {
 
     if (tokens[i] === "{" && tokens[i][0] !== "T_CONSTANT_ENCAPSED_STRING") {
       break;
+    }
+  }
+
+  const lineTokens = tokens
+    .filter((token: Array<any>) => {
+      return token[2] === position.line + 1;
+    })
+    .reverse();
+
+  for (let j = 0; j < lineTokens.length; j++) {
+    if (!lineTokens[j][1].includes(">")) {
+      break;
+    }
+
+    if (
+      lineTokens[j][0] === "T_OBJECT_OPERATOR" &&
+      lineTokens[j + 1][1] === "$this"
+    ) {
+      console.log(lineTokens);
+      break;
+    }
+
+    if (
+      lineTokens[j][0] !== "T_OBJECT_OPERATOR" ||
+      lineTokens[j + 1][1] !== "T_VARIABLE"
+    ) {
+      return [];
     }
   }
 
