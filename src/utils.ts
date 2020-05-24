@@ -67,15 +67,6 @@ export function tokenByAlias(
     })
     .reverse();
 
-  const firstToken = lineTokens.shift();
-
-  if (
-    firstToken[0] !== "T_CONSTANT_ENCAPSED_STRING" ||
-    firstToken[1] !== "''"
-  ) {
-    return aliasToken;
-  }
-
   for (const token of lineTokens) {
     if (token[0] === "T_STRING" && aliases.includes(token[1])) {
       aliasToken = token;
@@ -83,7 +74,7 @@ export function tokenByAlias(
       break;
     }
 
-    if (token[0] !== "T_STRING") {
+    if (token[0] !== "T_STRING" && token[0] !== "T_CONSTANT_ENCAPSED_STRING") {
       break;
     }
   }

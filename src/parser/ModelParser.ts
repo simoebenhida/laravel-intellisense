@@ -72,14 +72,6 @@ export default class ModelParser {
     return uses;
   }
 
-  getCurrentLineTokens(): Array<any> {
-    return this.tokens
-      .filter((token: Array<any>) => {
-        return token[2] === this.position.line + 1;
-      })
-      .reverse();
-  }
-
   getAliasToken() {
     return tokenByAlias(this.tokens, this.queryAliases, this.position);
   }
@@ -289,7 +281,10 @@ export default class ModelParser {
       };
     }
 
-    return this.getUsedVariableFirstIndexOrClassName(tokens, variableToken);
+    return this.getUsedVariableFirstIndexOrClassName(
+      tokens.reverse(),
+      variableToken
+    );
   }
 
   getClassNameFromToken(

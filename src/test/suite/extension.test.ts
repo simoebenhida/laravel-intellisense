@@ -129,6 +129,30 @@ suite("Model Parser Test", () => {
     assert.equal("App\\User", className);
   });
 
+  test("it can get model from multiple closure", () => {
+    const tokens = phpParserTokens(`
+        <?php
+        use App\\User;
+        use App\\Post;
+
+        $query = Post::query();
+
+        $query = User::query()
+            ->when($this->term, function ($query) {
+                $query->where('name', 'John');
+            })
+            ->when($this->term, function ($query) {
+                $query->where('');
+            })
+    `);
+
+    const modelParser = new ModelParser(tokens, new vscode.Position(12, 32));
+
+    const className = modelParser.getFullClassName();
+
+    assert.equal("App\\User", className);
+  });
+
   test("it can get multiple models", () => {
     const tokens = phpParserTokens(`
         <?php
