@@ -1,5 +1,6 @@
-import { TextDocument, Position } from "vscode";
-import { isUndefined, isNull, isArray, isString, isObject } from "util";
+import { Position } from "vscode";
+import { isUndefined, isNull, isString } from "util";
+import { tokenByAlias } from "../utils";
 
 export default class ModelParser {
   tokens: Array<any>;
@@ -7,6 +8,22 @@ export default class ModelParser {
   position: Position;
 
   aliasToken: Array<any> = [];
+
+  queryAliases: Array<string> = [
+    "where",
+    "get",
+    "firstWhere",
+    "value",
+    "orWhere",
+    "latest",
+    "oldest",
+    "firstWhere",
+    "firstOrFail",
+    "pluck",
+    "increment",
+    "decrement",
+    "qualifyColumn",
+  ];
 
   constructor(tokens: Array<any>, position: Position) {
     this.tokens = tokens;
@@ -64,45 +81,7 @@ export default class ModelParser {
   }
 
   getAliasToken() {
-    const queryAliases = [
-      "where",
-      "get",
-      "firstWhere",
-      "value",
-      "orWhere",
-      "latest",
-      "oldest",
-      "firstWhere",
-      "firstOrFail",
-      "pluck",
-      "increment",
-      "decrement",
-      "qualifyColumn",
-    ];
-
-    let aliasToken: Array<any> = [];
-
-    const lineTokens = this.getCurrentLineTokens();
-
-    const firstToken = lineTokens.shift();
-
-    if (firstToken[0] !== "T_CONSTANT_ENCAPSED_STRING" || firstToken[1] !== "''") {
-      return aliasToken;
-    }
-
-    for (const token of lineTokens) {
-      if (token[0] === "T_STRING" && queryAliases.includes(token[1])) {
-        aliasToken = token;
-
-        break;
-      }
-
-      if (token[0] !== "T_STRING") {
-        break;
-      }
-    }
-
-    return aliasToken;
+    return tokenByAlias(this.tokens, this.queryAliases, this.position);
   }
 
   getUsedVariableTokenOrClassName(

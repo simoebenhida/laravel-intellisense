@@ -1,4 +1,4 @@
-import { WorkspaceFolder, workspace } from "vscode";
+import { WorkspaceFolder, workspace, Position } from "vscode";
 import { isArray } from "util";
 
 export function activeWorkspace(): any {
@@ -39,7 +39,11 @@ export function phpParserTokens(document: string) {
   return parser
     .tokenGetAll(document)
     .filter((token: Array<any>) => {
-        return token[0] !== "T_WHITESPACE" && token[0] !== "T_COMMENT" && token[0] !== "T_INLINE_HTML";
+      return (
+        token[0] !== "T_WHITESPACE" &&
+        token[0] !== "T_COMMENT" &&
+        token[0] !== "T_INLINE_HTML"
+      );
     })
     .map((token: Array<any>, index: number) => {
       if (isArray(token)) {
@@ -50,24 +54,39 @@ export function phpParserTokens(document: string) {
     });
 }
 
-// <?php
+export function tokenByAlias(
+  tokens: Array<any>,
+  aliases: Array<string>,
+  position: Position
+) {
+  let aliasToken: Array<any> = [];
 
-// use App\User;
-// use App\Post;
+  const lineTokens = tokens
+    .filter((token: Array<any>) => {
+      return token[2] === position.line + 1;
+    })
+    .reverse();
 
-// Route::get('/', function (User $user, Post $post) {
-//     $user->where('')->where('')
+  const firstToken = lineTokens.shift();
 
-//     $user->firstWhere('name', 'John');
+  if (
+    firstToken[0] !== "T_CONSTANT_ENCAPSED_STRING" ||
+    firstToken[1] !== "''"
+  ) {
+    return aliasToken;
+  }
 
-//     $post->where('')
-// });
+  for (const token of lineTokens) {
+    if (token[0] === "T_STRING" && aliases.includes(token[1])) {
+      aliasToken = token;
 
-// Route::get('/', function () {
-//     $user = User::where('');
+      break;
+    }
 
-//     $user->when(true, function ($query) {
-//         $query->where('')
-//     });
-// });
+    if (token[0] !== "T_STRING") {
+      break;
+    }
+  }
 
+  return aliasToken;
+}
