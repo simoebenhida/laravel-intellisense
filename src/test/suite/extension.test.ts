@@ -5,7 +5,7 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 // import * as myExtension from '../../extension';
 import ModelParser from "./../../parser/ModelParser";
-import { phpParserTokens } from "../../utils";
+import { phpParserTokens, getEloquentAliasToken } from "../../utils";
 
 suite("Model Parser Test", () => {
   test("it can get model from inline model", () => {
@@ -14,7 +14,13 @@ suite("Model Parser Test", () => {
             App\\User::where('');
         `);
 
-    const modelParser = new ModelParser(tokens, new vscode.Position(2, 39));
+    const aliasToken = getEloquentAliasToken(
+      tokens,
+      ["where"],
+      new vscode.Position(2, 39)
+    );
+
+    const modelParser = new ModelParser(tokens, aliasToken);
 
     const className = modelParser.getFullClassName();
 
@@ -29,7 +35,13 @@ suite("Model Parser Test", () => {
             $user = User::where('');
         `);
 
-    const modelParser = new ModelParser(tokens, new vscode.Position(4, 34));
+    const aliasToken = getEloquentAliasToken(
+      tokens,
+      ["where"],
+      new vscode.Position(4, 34)
+    );
+
+    const modelParser = new ModelParser(tokens, aliasToken);
 
     const className = modelParser.getFullClassName();
 
@@ -44,7 +56,13 @@ suite("Model Parser Test", () => {
             $user = User::where('name', $name)->where('');
         `);
 
-    const modelParser = new ModelParser(tokens, new vscode.Position(4, 56));
+    const aliasToken = getEloquentAliasToken(
+      tokens,
+      ["where"],
+      new vscode.Position(4, 56)
+    );
+
+    const modelParser = new ModelParser(tokens, aliasToken);
 
     const className = modelParser.getFullClassName();
 
@@ -61,7 +79,13 @@ suite("Model Parser Test", () => {
             });
     `);
 
-    const modelParser = new ModelParser(tokens, new vscode.Position(5, 31));
+    const aliasToken = getEloquentAliasToken(
+      tokens,
+      ["where"],
+      new vscode.Position(5, 31)
+    );
+
+    const modelParser = new ModelParser(tokens, aliasToken);
 
     const className = modelParser.getFullClassName();
 
@@ -81,7 +105,13 @@ suite("Model Parser Test", () => {
             });
     `);
 
-    const modelParser = new ModelParser(tokens, new vscode.Position(7, 34));
+    const aliasToken = getEloquentAliasToken(
+      tokens,
+      ["where"],
+      new vscode.Position(7, 34)
+    );
+
+    const modelParser = new ModelParser(tokens, aliasToken);
 
     const className = modelParser.getFullClassName();
 
@@ -101,7 +131,13 @@ suite("Model Parser Test", () => {
             });
     `);
 
-    const modelParser = new ModelParser(tokens, new vscode.Position(7, 34));
+    const aliasToken = getEloquentAliasToken(
+      tokens,
+      ["where"],
+      new vscode.Position(7, 34)
+    );
+
+    const modelParser = new ModelParser(tokens, aliasToken);
 
     const className = modelParser.getFullClassName();
 
@@ -122,7 +158,13 @@ suite("Model Parser Test", () => {
             })
     `);
 
-    const modelParser = new ModelParser(tokens, new vscode.Position(9, 32));
+    const aliasToken = getEloquentAliasToken(
+      tokens,
+      ["where"],
+      new vscode.Position(9, 32)
+    );
+
+    const modelParser = new ModelParser(tokens, aliasToken);
 
     const className = modelParser.getFullClassName();
 
@@ -146,7 +188,13 @@ suite("Model Parser Test", () => {
             })
     `);
 
-    const modelParser = new ModelParser(tokens, new vscode.Position(12, 32));
+    const aliasToken = getEloquentAliasToken(
+      tokens,
+      ["where"],
+      new vscode.Position(12, 32)
+    );
+
+    const modelParser = new ModelParser(tokens, aliasToken);
 
     const className = modelParser.getFullClassName();
 
@@ -166,7 +214,13 @@ suite("Model Parser Test", () => {
         });
     `);
 
-    const modelParser = new ModelParser(tokens, new vscode.Position(8, 27));
+    const aliasToken = getEloquentAliasToken(
+      tokens,
+      ["where"],
+      new vscode.Position(8, 27)
+    );
+
+    const modelParser = new ModelParser(tokens, aliasToken);
 
     const className = modelParser.getFullClassName();
 

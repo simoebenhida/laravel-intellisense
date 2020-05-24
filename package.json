@@ -19,7 +19,19 @@
 				"command": "generate_ide_helper",
 				"title": "Generate Ide Helper"
 			}
-		]
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "Laravel Intellisense",
+            "properties": {
+                "LaravelIntellisense.model": {
+                    "type": "string",
+                    "scope": "resource",
+                    "default": "App\\Models",
+                    "description": "The model namespace."
+                }
+            }
+        }
 	},
 	"scripts": {
 		"vscode:prepublish": "yarn run compile",

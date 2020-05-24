@@ -20,7 +20,9 @@ export default class ModelItemProvider {
   ) {
     let items: Array<vscode.CompletionItem> = [];
 
-    let model = new Parser(document, position).hasModel();
+    let model = new Parser(document, position).getClassName();
+
+    console.log(model);
 
     if (isNull(model)) {
       return items;

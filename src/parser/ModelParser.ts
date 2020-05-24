@@ -1,39 +1,18 @@
 import { Position } from "vscode";
 import { isUndefined, isNull, isString } from "util";
-import { tokenByAlias } from "../utils";
 
 export default class ModelParser {
   tokens: Array<any>;
 
-  position: Position;
-
   aliasToken: Array<any> = [];
 
-  queryAliases: Array<string> = [
-    "where",
-    "get",
-    "firstWhere",
-    "value",
-    "orWhere",
-    "latest",
-    "oldest",
-    "firstWhere",
-    "firstOrFail",
-    "pluck",
-    "increment",
-    "decrement",
-    "qualifyColumn",
-  ];
-
-  constructor(tokens: Array<any>, position: Position) {
+  constructor(tokens: Array<any>, aliasToken: Array<any>) {
     this.tokens = tokens;
 
-    this.position = position;
+    this.aliasToken = aliasToken;
   }
 
   getFullClassName() {
-    this.aliasToken = this.getAliasToken();
-
     const className = this.getClassNameFromToken();
 
     if (isNull(className)) {
@@ -70,10 +49,6 @@ export default class ModelParser {
     }
 
     return uses;
-  }
-
-  getAliasToken() {
-    return tokenByAlias(this.tokens, this.queryAliases, this.position);
   }
 
   getUsedVariableTokenOrClassName(

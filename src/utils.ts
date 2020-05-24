@@ -54,7 +54,7 @@ export function phpParserTokens(document: string) {
     });
 }
 
-export function tokenByAlias(
+export function getEloquentAliasToken(
   tokens: Array<any>,
   aliases: Array<string>,
   position: Position
@@ -68,6 +68,10 @@ export function tokenByAlias(
     .reverse();
 
   for (const token of lineTokens) {
+    if (token[0] === "T_OBJECT_OPERATOR") {
+      break;
+    }
+
     if (token[0] === "T_STRING" && aliases.includes(token[1])) {
       aliasToken = token;
 
@@ -75,6 +79,27 @@ export function tokenByAlias(
     }
 
     if (token[0] !== "T_STRING" && token[0] !== "T_CONSTANT_ENCAPSED_STRING") {
+      break;
+    }
+  }
+
+  return aliasToken;
+}
+
+export function getResourceAliasToken(tokens: Array<any>, position: Position) {
+  let aliasToken: Array<any> = [];
+
+  for (let i = 0; i < tokens.length; i++) {
+    if (
+      i > 0 &&
+      tokens[i - 1][0] === "T_CLASS" &&
+      tokens[i][0] === "T_STRING" &&
+      tokens[i][1].endsWith("Resource")
+    ) {
+      aliasToken = tokens[i];
+    }
+
+    if (tokens[i] === "{" && tokens[i][0] !== "T_CONSTANT_ENCAPSED_STRING") {
       break;
     }
   }

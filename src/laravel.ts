@@ -9,7 +9,7 @@ export const DOCUMENT_SELECTOR =
         { scheme: 'file', language: 'laravel-blade' }
     ];
 
-export const TRIGGER_CHARACTERS = ['"', "'", ' ', '.'];
+export const TRIGGER_CHARACTERS = ['"', "'", ">"];
 
 export function hasArtisan(): boolean {
     return fs.existsSync(path("artisan"));

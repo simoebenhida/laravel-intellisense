@@ -1,7 +1,11 @@
 import { TextDocument, Position } from "vscode";
 import ModelParser from "./ModelParser";
-import { isNull } from "util";
-import { phpParserTokens } from "../utils";
+import ResourceParser from "./ResourceParser";
+import {
+  phpParserTokens,
+  getResourceAliasToken,
+  getEloquentAliasToken,
+} from "../utils";
 
 export default class Parser {
   cachedParseFunction: any = null;
@@ -17,6 +21,22 @@ export default class Parser {
     "@each",
   ];
 
+  queryAliases: Array<string> = [
+    "where",
+    "get",
+    "firstWhere",
+    "value",
+    "orWhere",
+    "latest",
+    "oldest",
+    "firstWhere",
+    "firstOrFail",
+    "pluck",
+    "increment",
+    "decrement",
+    "qualifyColumn",
+  ];
+
   classes: Array<string> = ["Config", "Route", "Lang", "Validator", "View"];
 
   configAliases: Array<string> = ["config("];
@@ -25,10 +45,14 @@ export default class Parser {
 
   position: Position;
 
+  tokens: Array<any> = [];
+
   constructor(document: TextDocument, position: Position) {
     this.document = document;
 
     this.position = position;
+
+    this.tokens = this.parseTokens();
   }
 
   parseTokens() {
@@ -43,8 +67,32 @@ export default class Parser {
     });
   }
 
-  hasModel() {
-    const modelParser = new ModelParser(this.parseTokens(), this.position);
+  getClassName() {
+    let aliasToken = getResourceAliasToken(this.tokens, this.position);
+
+    if (aliasToken.length) {
+      return this.hasResource(aliasToken);
+    }
+
+    aliasToken = getEloquentAliasToken(
+      this.tokens,
+      this.queryAliases,
+      this.position
+    );
+
+    return this.hasModel(aliasToken);
+  }
+
+  hasModel(aliasToken: Array<any>) {
+    const modelParser = new ModelParser(this.tokens, aliasToken);
+
+    const className = modelParser.getFullClassName();
+
+    return className;
+  }
+
+  hasResource(aliasToken: Array<any>) {
+    const modelParser = new ResourceParser(this.tokens, aliasToken);
 
     const className = modelParser.getFullClassName();
 
