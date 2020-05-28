@@ -5,6 +5,7 @@ import {
   phpParserTokens,
   getResourceAliasToken,
   getEloquentAliasToken,
+  getFactoryAliasToken
 } from "../utils";
 
 export default class Parser {
@@ -68,19 +69,22 @@ export default class Parser {
   }
 
   getClassName() {
-    let aliasToken = getResourceAliasToken(this.tokens, this.position);
+    console.log(getFactoryAliasToken(this.tokens, this.position));
 
-    if (aliasToken.length) {
-      return this.hasResource(aliasToken);
-    }
+    return null;
+    // let aliasToken = getResourceAliasToken(this.tokens, this.position);
 
-    aliasToken = getEloquentAliasToken(
-      this.tokens,
-      this.queryAliases,
-      this.position
-    );
+    // if (aliasToken.length) {
+    //   return this.hasResource(aliasToken);
+    // }
 
-    return this.hasModel(aliasToken);
+    // aliasToken = getEloquentAliasToken(
+    //   this.tokens,
+    //   this.queryAliases,
+    //   this.position
+    // );
+
+    // return this.hasModel(aliasToken);
   }
 
   hasModel(aliasToken: Array<any>) {

@@ -132,3 +132,15 @@ export function getResourceAliasToken(tokens: Array<any>, position: Position) {
 
   return aliasToken;
 }
+
+
+export function getFactoryAliasToken(tokens: Array<any>, position: Position) {
+    console.log(tokens);
+    // T_VARIABLE - $factory
+    // T_OBJECT_OPERATOR - ->
+    // T_STRING - define
+
+    for (let i =0; i < tokens.length; i++) {
+        // if (tokens[i][0] === 'T_VARIABLE' && )
+    }
+}
