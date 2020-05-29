@@ -22,8 +22,6 @@ export default class ModelItemProvider {
 
     let model = new Parser(document, position).getClassName();
 
-    console.log(model);
-
     if (isNull(model)) {
       return items;
     }

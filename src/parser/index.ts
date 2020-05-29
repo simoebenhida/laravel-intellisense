@@ -5,8 +5,10 @@ import {
   phpParserTokens,
   getResourceAliasToken,
   getEloquentAliasToken,
-  getFactoryAliasToken
+  getFactoryAliasToken,
 } from "../utils";
+import Handler from "./Handler";
+import FactoryParser from "./FactoryParser";
 
 export default class Parser {
   cachedParseFunction: any = null;
@@ -69,22 +71,29 @@ export default class Parser {
   }
 
   getClassName() {
-    console.log(getFactoryAliasToken(this.tokens, this.position));
+    const handler = new Handler(this.tokens, this.position, this.queryAliases);
+
+    const eloquentAliasToken = handler.getEloquentAliasToken();
+
+    if (eloquentAliasToken.length > 0)
+    {
+        return this.hasModel(eloquentAliasToken);
+    }
+
+    let resourceAliasToken = handler.getResourceAliasToken();
+
+    if (resourceAliasToken.length) {
+      return this.hasResource(resourceAliasToken);
+    }
+
+    const factoryAliasToken = handler.getFactoryAliasToken();
+
+    if (factoryAliasToken.length > 0)
+    {
+        return this.hasFactory(factoryAliasToken);
+    }
 
     return null;
-    // let aliasToken = getResourceAliasToken(this.tokens, this.position);
-
-    // if (aliasToken.length) {
-    //   return this.hasResource(aliasToken);
-    // }
-
-    // aliasToken = getEloquentAliasToken(
-    //   this.tokens,
-    //   this.queryAliases,
-    //   this.position
-    // );
-
-    // return this.hasModel(aliasToken);
   }
 
   hasModel(aliasToken: Array<any>) {
@@ -97,6 +106,14 @@ export default class Parser {
 
   hasResource(aliasToken: Array<any>) {
     const modelParser = new ResourceParser(this.tokens, aliasToken);
+
+    const className = modelParser.getFullClassName();
+
+    return className;
+  }
+
+  hasFactory(aliasToken: Array<any>) {
+    const modelParser = new FactoryParser(this.tokens, aliasToken);
 
     const className = modelParser.getFullClassName();
 
