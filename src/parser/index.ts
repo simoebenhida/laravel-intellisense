@@ -14,14 +14,14 @@ export default class Parser {
   cachedParseFunction: any = null;
 
   viewAliases: Array<string> = [
-    "View",
-    "view",
-    "markdown",
-    "links",
-    "@extends",
-    "@component",
-    "@include",
-    "@each",
+    "View::",
+    "view(",
+    "markdown(",
+    "links(",
+    "@extends(",
+    "@component(",
+    "@include(",
+    "@each(",
   ];
 
   queryAliases: Array<string> = [
@@ -40,9 +40,9 @@ export default class Parser {
     "qualifyColumn",
   ];
 
-  classes: Array<string> = ["Config", "Route", "Lang", "Validator", "View"];
-
   configAliases: Array<string> = ["config("];
+
+  routeAliases: Array<string> = ["route("];
 
   document: TextDocument;
 
@@ -75,22 +75,25 @@ export default class Parser {
 
     const eloquentAliasToken = handler.getEloquentAliasToken();
 
-    if (eloquentAliasToken.length > 0)
-    {
-        return this.hasModel(eloquentAliasToken);
+    if (eloquentAliasToken.length > 0) {
+        console.log('eloquent')
+      return this.hasModel(eloquentAliasToken);
     }
 
     let resourceAliasToken = handler.getResourceAliasToken();
 
     if (resourceAliasToken.length) {
+        console.log('resource')
+
       return this.hasResource(resourceAliasToken);
     }
 
     const factoryAliasToken = handler.getFactoryAliasToken();
 
-    if (factoryAliasToken.length > 0)
-    {
-        return this.hasFactory(factoryAliasToken);
+    if (factoryAliasToken.length > 0) {
+        console.log('factory')
+
+      return this.hasFactory(factoryAliasToken);
     }
 
     return null;

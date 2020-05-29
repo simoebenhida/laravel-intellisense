@@ -29,8 +29,15 @@ export default class Handler {
       })
       .reverse();
 
-    for (const token of lineTokens) {
-      if (token[0] === "T_OBJECT_OPERATOR" || token[0] === "T_DOUBLE_ARROW") {
+    for (let j = 0; j < lineTokens.length; j++) {
+      if (
+        lineTokens[j][0] === "T_OBJECT_OPERATOR" ||
+        lineTokens[j][0] === "T_DOUBLE_ARROW"
+      ) {
+        return [];
+      }
+
+      if (j >= 1 && lineTokens[j][0] !== "T_RETURN") {
         return [];
       }
     }
