@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import Parser from "./parser/index";
 import { getRouterNames } from "./php/router";
 
-export default class ConfigItemProvider {
+export default class RouterItemProvider {
   private routes: any = null;
 
   constructor() {

@@ -6,7 +6,7 @@ import * as vscode from "vscode";
 // import * as myExtension from '../../extension';
 import ModelParser from "./../../parser/ModelParser";
 import { phpParserTokens } from "../../utils";
-import Handler from '../../parser/Handler';
+import Handler from "../../parser/Handler";
 
 suite("Model Parser Test", () => {
   test("it can get model from inline model", () => {
@@ -15,11 +15,9 @@ suite("Model Parser Test", () => {
             App\\User::where('');
         `);
 
-    const aliasToken = Handler.getEloquentAliasToken(
-      tokens,
-      ["where"],
-      new vscode.Position(2, 39)
-    );
+    const handler = new Handler(tokens, new vscode.Position(2, 39), ["where"]);
+
+    const aliasToken = handler.getEloquentAliasToken();
 
     const modelParser = new ModelParser(tokens, aliasToken);
 
@@ -36,11 +34,9 @@ suite("Model Parser Test", () => {
             $user = User::where('');
         `);
 
-    const aliasToken = Handler.getEloquentAliasToken(
-      tokens,
-      ["where"],
-      new vscode.Position(4, 34)
-    );
+    const handler = new Handler(tokens, new vscode.Position(4, 34), ["where"]);
+
+    const aliasToken = handler.getEloquentAliasToken();
 
     const modelParser = new ModelParser(tokens, aliasToken);
 
@@ -57,11 +53,9 @@ suite("Model Parser Test", () => {
             $user = User::where('name', $name)->where('');
         `);
 
-    const aliasToken = Handler.getEloquentAliasToken(
-      tokens,
-      ["where"],
-      new vscode.Position(4, 56)
-    );
+    const handler = new Handler(tokens, new vscode.Position(4, 56), ["where"]);
+
+    const aliasToken = handler.getEloquentAliasToken();
 
     const modelParser = new ModelParser(tokens, aliasToken);
 
@@ -80,11 +74,9 @@ suite("Model Parser Test", () => {
             });
     `);
 
-    const aliasToken = Handler.getEloquentAliasToken(
-      tokens,
-      ["where"],
-      new vscode.Position(5, 31)
-    );
+    const handler = new Handler(tokens, new vscode.Position(5, 31), ["where"]);
+
+    const aliasToken = handler.getEloquentAliasToken();
 
     const modelParser = new ModelParser(tokens, aliasToken);
 
@@ -106,11 +98,9 @@ suite("Model Parser Test", () => {
             });
     `);
 
-    const aliasToken = Handler.getEloquentAliasToken(
-      tokens,
-      ["where"],
-      new vscode.Position(7, 34)
-    );
+    const handler = new Handler(tokens, new vscode.Position(7, 34), ["where"]);
+
+    const aliasToken = handler.getEloquentAliasToken();
 
     const modelParser = new ModelParser(tokens, aliasToken);
 
@@ -132,11 +122,9 @@ suite("Model Parser Test", () => {
             });
     `);
 
-    const aliasToken = Handler.getEloquentAliasToken(
-      tokens,
-      ["where"],
-      new vscode.Position(7, 34)
-    );
+    const handler = new Handler(tokens, new vscode.Position(7, 34), ["where"]);
+
+    const aliasToken = handler.getEloquentAliasToken();
 
     const modelParser = new ModelParser(tokens, aliasToken);
 
@@ -159,11 +147,9 @@ suite("Model Parser Test", () => {
             })
     `);
 
-    const aliasToken = Handler.getEloquentAliasToken(
-      tokens,
-      ["where"],
-      new vscode.Position(9, 32)
-    );
+    const handler = new Handler(tokens, new vscode.Position(9, 32), ["where"]);
+
+    const aliasToken = handler.getEloquentAliasToken();
 
     const modelParser = new ModelParser(tokens, aliasToken);
 
@@ -189,11 +175,9 @@ suite("Model Parser Test", () => {
             })
     `);
 
-    const aliasToken = Handler.getEloquentAliasToken(
-      tokens,
-      ["where"],
-      new vscode.Position(12, 32)
-    );
+    const handler = new Handler(tokens, new vscode.Position(12, 32), ["where"]);
+
+    const aliasToken = handler.getEloquentAliasToken();
 
     const modelParser = new ModelParser(tokens, aliasToken);
 
@@ -215,11 +199,9 @@ suite("Model Parser Test", () => {
         });
     `);
 
-    const aliasToken = Handler.getEloquentAliasToken(
-      tokens,
-      ["where"],
-      new vscode.Position(8, 27)
-    );
+    const handler = new Handler(tokens, new vscode.Position(8, 27), ["where"]);
+
+    const aliasToken = handler.getEloquentAliasToken();
 
     const modelParser = new ModelParser(tokens, aliasToken);
 
