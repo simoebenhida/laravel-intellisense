@@ -9,14 +9,13 @@ export default class Parser {
   cachedParseFunction: any = null;
 
   viewAliases: Array<string> = [
-    "View::",
-    "view(",
-    "markdown(",
-    "links(",
-    "@extends(",
-    "@component(",
-    "@include(",
-    "@each(",
+    "view",
+    "markdown",
+    "links",
+    "@extends",
+    "@component",
+    "@include",
+    "@each",
   ];
 
   queryAliases: Array<string> = [
@@ -35,9 +34,9 @@ export default class Parser {
     "qualifyColumn",
   ];
 
-  configAliases: Array<string> = ["config("];
+  configAliases: Array<string> = ["config"];
 
-  routeAliases: Array<string> = ["route("];
+  routeAliases: Array<string> = ["route"];
 
   document: TextDocument;
 
@@ -55,14 +54,6 @@ export default class Parser {
 
   parseTokens() {
     return phpParserTokens(this.document.getText());
-  }
-
-  hasView() {
-    return this.viewAliases.some((alias: string) => {
-      const text = this.document.lineAt(this.position).text;
-
-      return text.includes(alias);
-    });
   }
 
   getClassName() {
@@ -114,18 +105,20 @@ export default class Parser {
   }
 
   hasConfig() {
-    return this.configAliases.some((alias) => {
-      const text = this.document.lineAt(this.position).text;
+    const handler = new Handler(this.tokens, this.position, this.configAliases);
 
-      return text.includes(alias);
-    });
+    return handler.hasAlias();
   }
 
   hasRoute() {
-    return this.routeAliases.some((alias) => {
-      const text = this.document.lineAt(this.position).text;
+    const handler = new Handler(this.tokens, this.position, this.routeAliases);
 
-      return text.includes(alias);
-    });
+    return handler.hasAlias();
+  }
+
+  hasView() {
+    const handler = new Handler(this.tokens, this.position, this.viewAliases);
+
+    return handler.hasAlias();
   }
 }

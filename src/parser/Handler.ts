@@ -6,38 +6,18 @@ export default class Handler {
 
   position: Position;
 
-  eloquentAliases: Array<string>;
+  aliases: Array<string>;
 
-  constructor(
-    tokens: Array<any>,
-    position: Position,
-    eloquentAliases: Array<string>
-  ) {
+  constructor(tokens: Array<any>, position: Position, aliases: Array<string>) {
     this.tokens = tokens;
 
     this.position = position;
 
-    this.eloquentAliases = eloquentAliases;
+    this.aliases = aliases;
   }
 
   getEloquentAliasToken() {
-    let aliasToken: Array<any> = [];
-
-    const lineTokens = this.tokens
-      .filter((token: Array<any>) => {
-        return token[2] === this.position.line + 1;
-      })
-      .reverse();
-
-    lineTokens.shift();
-
-    const alias = lineTokens.shift();
-
-    if (this.eloquentAliases.includes(alias[1])) {
-      aliasToken = alias;
-    }
-
-    return aliasToken;
+    return this.getAliasToken();
   }
 
   getResourceAliasToken() {
@@ -137,5 +117,34 @@ export default class Handler {
     }
 
     return aliasToken;
+  }
+
+  hasAlias(): boolean {
+    return this.getAliasToken().length > 0;
+  }
+
+  getAliasToken(): Array<any> {
+    let aliasToken: Array<any> = [];
+
+    const tokens = this.tokensOnTheSameLine();
+
+    // Remove TRIGGER_CHARACTERS
+    tokens.shift();
+
+    const alias = tokens.shift();
+
+    if (isArray(alias) && this.aliases.includes(alias[1])) {
+      aliasToken = alias;
+    }
+
+    return aliasToken;
+  }
+
+  tokensOnTheSameLine(): Array<any> {
+    return this.tokens
+      .filter((token: Array<any>) => {
+        return token[2] === this.position.line + 1;
+      })
+      .reverse();
   }
 }
