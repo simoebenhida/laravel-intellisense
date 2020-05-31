@@ -12,7 +12,7 @@ import {
 } from 'vscode';
 import { activeWorkspace } from "./utils";
 import { getViews } from "./php/view";
-import Parser from "./parser";
+import Parser from "./parser/index";
 
 export default class ViewItemProvider implements CompletionItemProvider {
 

@@ -1,14 +1,12 @@
 import * as vscode from "vscode";
-import { getModelAttributes } from "./php/model";
 import Parser from "./parser/index";
-import { isNull } from "util";
-import { getConfigElements } from "./php/config";
+import { getRouterNames } from "./php/router";
 
 export default class ConfigItemProvider {
-  private elements: any = null;
+  private routes: any = null;
 
   constructor() {
-      this.syncConfig();
+    this.syncRoutes();
   }
 
   async provideCompletionItems(
@@ -19,15 +17,15 @@ export default class ConfigItemProvider {
   ) {
     let items: Array<vscode.CompletionItem> = [];
 
-    let hasConfig = new Parser(document, position).hasConfig();
-
-    if (!hasConfig) {
+    let hasRoute = new Parser(document, position).hasRoute();
+    console.log(hasRoute);
+    if (!hasRoute) {
       return items;
     }
 
-    for (let element of this.elements) {
+    for (let route of this.routes) {
       const item = new vscode.CompletionItem(
-        element,
+        route,
         vscode.CompletionItemKind.Constant
       );
 
@@ -42,9 +40,9 @@ export default class ConfigItemProvider {
     return items;
   }
 
-  async syncConfig() {
-    await getConfigElements().then((elements) => {
-      this.elements = Object.values(JSON.parse(elements));
+  async syncRoutes() {
+    await getRouterNames().then((routes) => {
+      this.routes = Object.values(JSON.parse(routes));
     });
   }
 }

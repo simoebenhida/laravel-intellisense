@@ -1,6 +1,4 @@
-import { getResourceAliasToken } from "../utils";
 import { workspace } from "vscode";
-import { strict } from "assert";
 import { isUndefined } from "util";
 
 export default class ResourceParser {

@@ -5,7 +5,8 @@ import * as assert from "assert";
 import * as vscode from "vscode";
 // import * as myExtension from '../../extension';
 import ModelParser from "./../../parser/ModelParser";
-import { phpParserTokens, getEloquentAliasToken } from "../../utils";
+import { phpParserTokens } from "../../utils";
+import Handler from '../../parser/Handler';
 
 suite("Model Parser Test", () => {
   test("it can get model from inline model", () => {
@@ -14,7 +15,7 @@ suite("Model Parser Test", () => {
             App\\User::where('');
         `);
 
-    const aliasToken = getEloquentAliasToken(
+    const aliasToken = Handler.getEloquentAliasToken(
       tokens,
       ["where"],
       new vscode.Position(2, 39)
@@ -35,7 +36,7 @@ suite("Model Parser Test", () => {
             $user = User::where('');
         `);
 
-    const aliasToken = getEloquentAliasToken(
+    const aliasToken = Handler.getEloquentAliasToken(
       tokens,
       ["where"],
       new vscode.Position(4, 34)
@@ -56,7 +57,7 @@ suite("Model Parser Test", () => {
             $user = User::where('name', $name)->where('');
         `);
 
-    const aliasToken = getEloquentAliasToken(
+    const aliasToken = Handler.getEloquentAliasToken(
       tokens,
       ["where"],
       new vscode.Position(4, 56)
@@ -79,7 +80,7 @@ suite("Model Parser Test", () => {
             });
     `);
 
-    const aliasToken = getEloquentAliasToken(
+    const aliasToken = Handler.getEloquentAliasToken(
       tokens,
       ["where"],
       new vscode.Position(5, 31)
@@ -105,7 +106,7 @@ suite("Model Parser Test", () => {
             });
     `);
 
-    const aliasToken = getEloquentAliasToken(
+    const aliasToken = Handler.getEloquentAliasToken(
       tokens,
       ["where"],
       new vscode.Position(7, 34)
@@ -131,7 +132,7 @@ suite("Model Parser Test", () => {
             });
     `);
 
-    const aliasToken = getEloquentAliasToken(
+    const aliasToken = Handler.getEloquentAliasToken(
       tokens,
       ["where"],
       new vscode.Position(7, 34)
@@ -158,7 +159,7 @@ suite("Model Parser Test", () => {
             })
     `);
 
-    const aliasToken = getEloquentAliasToken(
+    const aliasToken = Handler.getEloquentAliasToken(
       tokens,
       ["where"],
       new vscode.Position(9, 32)
@@ -188,7 +189,7 @@ suite("Model Parser Test", () => {
             })
     `);
 
-    const aliasToken = getEloquentAliasToken(
+    const aliasToken = Handler.getEloquentAliasToken(
       tokens,
       ["where"],
       new vscode.Position(12, 32)
@@ -214,7 +215,7 @@ suite("Model Parser Test", () => {
         });
     `);
 
-    const aliasToken = getEloquentAliasToken(
+    const aliasToken = Handler.getEloquentAliasToken(
       tokens,
       ["where"],
       new vscode.Position(8, 27)

@@ -3,9 +3,6 @@ import ModelParser from "./ModelParser";
 import ResourceParser from "./ResourceParser";
 import {
   phpParserTokens,
-  getResourceAliasToken,
-  getEloquentAliasToken,
-  getFactoryAliasToken,
 } from "../utils";
 import Handler from "./Handler";
 import FactoryParser from "./FactoryParser";
@@ -76,14 +73,14 @@ export default class Parser {
     const eloquentAliasToken = handler.getEloquentAliasToken();
 
     if (eloquentAliasToken.length > 0) {
-        console.log('eloquent')
+      console.log("eloquent");
       return this.hasModel(eloquentAliasToken);
     }
 
     let resourceAliasToken = handler.getResourceAliasToken();
 
     if (resourceAliasToken.length) {
-        console.log('resource')
+      console.log("resource");
 
       return this.hasResource(resourceAliasToken);
     }
@@ -91,7 +88,7 @@ export default class Parser {
     const factoryAliasToken = handler.getFactoryAliasToken();
 
     if (factoryAliasToken.length > 0) {
-        console.log('factory')
+      console.log("factory");
 
       return this.hasFactory(factoryAliasToken);
     }
@@ -125,6 +122,14 @@ export default class Parser {
 
   hasConfig() {
     return this.configAliases.some((alias) => {
+      const text = this.document.lineAt(this.position).text;
+
+      return text.includes(alias);
+    });
+  }
+
+  hasRoute() {
+    return this.routeAliases.some((alias) => {
       const text = this.document.lineAt(this.position).text;
 
       return text.includes(alias);
