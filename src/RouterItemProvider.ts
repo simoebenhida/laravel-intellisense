@@ -18,7 +18,7 @@ export default class RouterItemProvider {
     let items: Array<vscode.CompletionItem> = [];
 
     let hasRoute = new Parser(document, position).hasRoute();
-    console.log(hasRoute);
+
     if (!hasRoute) {
       return items;
     }

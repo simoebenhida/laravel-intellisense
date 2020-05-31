@@ -1,9 +1,7 @@
 import { TextDocument, Position } from "vscode";
 import ModelParser from "./ModelParser";
 import ResourceParser from "./ResourceParser";
-import {
-  phpParserTokens,
-} from "../utils";
+import { phpParserTokens } from "../utils";
 import Handler from "./Handler";
 import FactoryParser from "./FactoryParser";
 
@@ -73,23 +71,18 @@ export default class Parser {
     const eloquentAliasToken = handler.getEloquentAliasToken();
 
     if (eloquentAliasToken.length > 0) {
-      console.log("eloquent");
       return this.hasModel(eloquentAliasToken);
     }
 
     let resourceAliasToken = handler.getResourceAliasToken();
 
     if (resourceAliasToken.length) {
-      console.log("resource");
-
       return this.hasResource(resourceAliasToken);
     }
 
     const factoryAliasToken = handler.getFactoryAliasToken();
 
     if (factoryAliasToken.length > 0) {
-      console.log("factory");
-
       return this.hasFactory(factoryAliasToken);
     }
 

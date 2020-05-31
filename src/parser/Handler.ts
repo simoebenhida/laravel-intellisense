@@ -29,23 +29,12 @@ export default class Handler {
       })
       .reverse();
 
-    for (const token of lineTokens) {
-      if (token[0] === "T_OBJECT_OPERATOR" || token[0] === "T_DOUBLE_ARROW") {
-        break;
-      }
+    lineTokens.shift();
 
-      if (token[0] === "T_STRING" && this.eloquentAliases.includes(token[1])) {
-        aliasToken = token;
+    const alias = lineTokens.shift();
 
-        break;
-      }
-
-      if (
-        token[0] !== "T_STRING" &&
-        token[0] !== "T_CONSTANT_ENCAPSED_STRING"
-      ) {
-        break;
-      }
+    if (this.eloquentAliases.includes(alias[1])) {
+      aliasToken = alias;
     }
 
     return aliasToken;
