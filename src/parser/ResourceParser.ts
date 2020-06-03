@@ -1,6 +1,4 @@
-import { workspace } from "vscode";
-import { isUndefined } from "util";
-
+import { getDefaultModelNamespace } from "../utils";
 export default class ResourceParser {
   tokens: Array<any>;
 
@@ -17,17 +15,7 @@ export default class ResourceParser {
       return null;
     }
 
-    let modelNamespace: string | undefined = workspace
-      .getConfiguration("LaravelIntellisense")
-      .get("model");
-
-    if (isUndefined(modelNamespace)) {
-      return null;
-    }
-
-    if (!modelNamespace.endsWith("\\")) {
-      modelNamespace += "\\";
-    }
+    const modelNamespace = getDefaultModelNamespace();
 
     return modelNamespace + this.aliasToken[1].replace("Resource", "");
   }

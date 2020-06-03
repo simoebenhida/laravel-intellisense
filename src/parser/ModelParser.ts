@@ -1,5 +1,6 @@
 import { Position } from "vscode";
 import { isUndefined, isNull, isString } from "util";
+import { getDefaultModelNamespace } from "../utils";
 
 export default class ModelParser {
   tokens: Array<any>;
@@ -18,13 +19,17 @@ export default class ModelParser {
     if (isNull(className)) {
       return null;
     }
+    console.log('class', className);
 
     const namespace = this.getUseClasses().find((namespace) => {
       return namespace.endsWith(className);
     });
 
     if (isUndefined(namespace)) {
-      return className;
+        return className;
+    //   const modelDefaultNamespace = getDefaultModelNamespace();
+
+    //   return modelDefaultNamespace + className;
     }
 
     return namespace;

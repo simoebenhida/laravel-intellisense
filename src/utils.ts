@@ -1,5 +1,5 @@
 import { WorkspaceFolder, workspace, Position } from "vscode";
-import { isArray } from "util";
+import { isArray, isUndefined } from "util";
 
 export function activeWorkspace(): any {
   if (!(workspace.workspaceFolders instanceof Array)) {
@@ -52,4 +52,20 @@ export function phpParserTokens(document: string) {
 
       return token;
     });
+}
+
+export function getDefaultModelNamespace() {
+  let modelNamespace: string | undefined = workspace
+    .getConfiguration("LaravelIntellisense")
+    .get("model");
+
+  if (isUndefined(modelNamespace)) {
+    return null;
+  }
+
+  if (!modelNamespace.endsWith("\\")) {
+    modelNamespace += "\\";
+  }
+
+  return modelNamespace;
 }

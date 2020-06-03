@@ -1,8 +1,8 @@
 {
   "name": "laravel-intellisense",
   "displayName": "laravel intellisense",
-  "description": "Laravel intellisense",
-  "version": "0.0.1",
+  "description": "Laravel intellisense for Visual Studio Code",
+  "version": "0.0.2",
   "publisher": "mohamedbenhida",
   "icon": "img/laravel.png",
   "engines": {
@@ -14,6 +14,15 @@
   "activationEvents": [
     "*"
   ],
+  "keywords": [
+    "php",
+    "intellisense",
+    "laravel"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/simoebenhida/laravel-intellisense"
+  },
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
