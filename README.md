@@ -1,6 +1,6 @@
 ## Laravel Intellisense
 
-![Screen Shot](/demo.gif)
+<p align="center"><img src="https://user-images.githubusercontent.com/19809072/83678730-1a3cd480-a5d6-11ea-93d0-c5976ab507f1.gif" alt="demo"></p>
 
 ## Features
 * Eloquent fields completions
