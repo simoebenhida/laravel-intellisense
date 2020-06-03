@@ -19,17 +19,15 @@ export default class ModelParser {
     if (isNull(className)) {
       return null;
     }
-    console.log('class', className);
 
     const namespace = this.getUseClasses().find((namespace) => {
       return namespace.endsWith(className);
     });
 
     if (isUndefined(namespace)) {
-        return className;
-    //   const modelDefaultNamespace = getDefaultModelNamespace();
+      const modelDefaultNamespace = getDefaultModelNamespace();
 
-    //   return modelDefaultNamespace + className;
+      return modelDefaultNamespace + className;
     }
 
     return namespace;
