@@ -1,6 +1,6 @@
 # Laravel Intellisense
 
-<p align="center"><img src="https://user-images.githubusercontent.com/19809072/83813638-a83bbc80-a6b5-11ea-98fc-9510f4f75956.gif" alt="demo"></p>
+<p align="center"><img src="https://user-images.githubusercontent.com/19809072/83813946-4fb8ef00-a6b6-11ea-8f96-332a693972a8.gif" alt="demo"></p>
 
 ## Features
   - [Eloquent Autocompletion](#eloquent-autocompletion)
