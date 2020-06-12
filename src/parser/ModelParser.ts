@@ -24,6 +24,10 @@ export default class ModelParser {
       return namespace.endsWith(className);
     });
 
+    if (className.includes('\\')) {
+        return className;
+    }
+
     if (isUndefined(namespace)) {
       const modelDefaultNamespace = getDefaultModelNamespace();
 
