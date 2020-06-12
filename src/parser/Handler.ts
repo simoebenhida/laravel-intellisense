@@ -54,14 +54,15 @@ export default class Handler {
 
       if (
         lineTokens[j][0] === "T_OBJECT_OPERATOR" &&
-        lineTokens[j + 1][1] === "$this"
+        lineTokens[j + 1][1] === "$this" &&
+        lineTokens.length > j + 1
       ) {
         break;
       }
 
       if (
         lineTokens[j][0] !== "T_OBJECT_OPERATOR" ||
-        lineTokens[j + 1][1] !== "T_VARIABLE"
+        (lineTokens[j + 1][1] !== "T_VARIABLE" && lineTokens.length > j + 1)
       ) {
         return [];
       }
