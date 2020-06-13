@@ -4,9 +4,9 @@ import * as assert from "assert";
 // as well as import your extension to test it
 import * as vscode from "vscode";
 // import * as myExtension from '../../extension';
-import ModelParser from "./../../parser/ModelParser";
-import { phpParserTokens } from "../../utils";
-import Handler from "../../parser/Handler";
+import ModelParser from "./../src/parser/ModelParser";
+import { phpParserTokens } from "../src/utils";
+import Handler from "../src/parser/Handler";
 
 suite("Model Parser Test", () => {
   test("it can get model from inline model", () => {

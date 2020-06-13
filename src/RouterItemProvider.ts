@@ -11,9 +11,7 @@ export default class RouterItemProvider {
 
   async provideCompletionItems(
     document: vscode.TextDocument,
-    position: vscode.Position,
-    token: vscode.CancellationToken,
-    context: vscode.CompletionContext
+    position: vscode.Position
   ) {
     let items: Array<vscode.CompletionItem> = [];
 

@@ -1,21 +1,17 @@
 import * as vscode from "vscode";
-import { getModelAttributes } from "./php/model";
 import Parser from "./parser/index";
-import { isNull } from "util";
 import { getConfigElements } from "./php/config";
 
 export default class ConfigItemProvider {
   private elements: any = null;
 
   constructor() {
-      this.syncConfig();
+    this.syncConfig();
   }
 
   async provideCompletionItems(
     document: vscode.TextDocument,
-    position: vscode.Position,
-    token: vscode.CancellationToken,
-    context: vscode.CompletionContext
+    position: vscode.Position
   ) {
     let items: Array<vscode.CompletionItem> = [];
 

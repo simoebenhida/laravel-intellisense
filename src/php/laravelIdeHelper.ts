@@ -35,7 +35,7 @@ export default class LaravelIdeHelper {
 
     this.workspaceEdit.insert(Uri, startOfFile, IDE_HELPER_CONTENT);
 
-    vscode.workspace.applyEdit(this.workspaceEdit).then((response) => {
+    vscode.workspace.applyEdit(this.workspaceEdit).then(() => {
       vscode.window.showInformationMessage("Ide helper file was created!");
     });
 
@@ -62,7 +62,7 @@ export default class LaravelIdeHelper {
         this.fileName
       );
 
-      vscode.workspace.applyEdit(this.workspaceEdit).then((response) => {
+      vscode.workspace.applyEdit(this.workspaceEdit).then(() => {
         document.save();
       });
     });

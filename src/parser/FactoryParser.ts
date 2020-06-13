@@ -1,5 +1,4 @@
-import { Position } from "vscode";
-import { isUndefined, isNull, isString } from "util";
+import { isUndefined, isNull } from "util";
 
 export default class FactoryParser {
   tokens: Array<any>;
@@ -49,11 +48,11 @@ export default class FactoryParser {
   }
 
   getUseClasses() {
-    let uses = [];
+    let uses: Array<any> = [];
 
     for (let i = 0; i < this.tokens.length; i++) {
       if (this.tokens[i][0] === "T_USE") {
-        let use = [];
+        let use: Array<any> = [];
         for (let j = i + 1; j < this.tokens.length; j++) {
           if (this.tokens[j] === ";") {
             break;

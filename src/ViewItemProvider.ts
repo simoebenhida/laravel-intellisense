@@ -1,70 +1,72 @@
 import {
-    TextDocument,
-    CompletionItemProvider,
-    Position,
-    CompletionContext,
-    CompletionItem,
-    CompletionItemKind,
-    Uri,
-    CancellationToken,
-    RelativePattern,
-    workspace
-} from 'vscode';
+  TextDocument,
+  CompletionItemProvider,
+  Position,
+  CompletionItem,
+  CompletionItemKind,
+  RelativePattern,
+  workspace,
+} from "vscode";
 import { activeWorkspace } from "./utils";
 import { getViews } from "./php/view";
 import Parser from "./parser/index";
 
 export default class ViewItemProvider implements CompletionItemProvider {
+  private views: any = {};
 
-    private timer: any = null;
+  private watcher: any = null;
 
-    private views: any = {};
+  constructor() {
+    this.syncViews();
 
-    private watcher: any = null;
+    this.watchViews();
+  }
 
-    constructor() {
-        this.syncViews();
+  provideCompletionItems(
+    document: TextDocument,
+    position: Position
+  ): Array<CompletionItem> {
+    let items: Array<CompletionItem> = [];
 
-        this.watchViews();
+    let hasView = new Parser(document, position).hasView();
+
+    if (!hasView) {
+      return items;
     }
 
-    provideCompletionItems(document: TextDocument, position: Position, token: CancellationToken, context: CompletionContext): Array<CompletionItem> {
-        let items: Array<CompletionItem> = [];
+    for (let view of this.views) {
+      const item = new CompletionItem(view, CompletionItemKind.Constant);
 
-        let hasView = new Parser(document, position).hasView();
+      item.range = document.getWordRangeAtPosition(
+        position,
+        /[\w\d\-_\.\:\\\/]+/g
+      );
 
-        if (!hasView) {
-            return items;
-        }
-
-        for (let view of this.views) {
-            const item = new CompletionItem(view, CompletionItemKind.Constant);
-
-            item.range = document.getWordRangeAtPosition(position, /[\w\d\-_\.\:\\\/]+/g);
-
-            items.push(item);
-        }
-
-        return items;
+      items.push(item);
     }
 
-    syncViews() {
-        getViews().then(views => {
-            this.views = JSON.parse(views);
-        });
-    }
+    return items;
+  }
 
-    watchViews() {
-        this.watcher = workspace.createFileSystemWatcher(new RelativePattern(activeWorkspace(), "{,**/}{view,views}/{*,**/*}"));
+  syncViews() {
+    getViews().then((views) => {
+      this.views = JSON.parse(views);
+    });
+  }
 
-        this.watcher.onDidCreate((e: Uri) => this.onChange());
-        this.watcher.onDidDelete((e: Uri) => this.onChange());
-        this.watcher.onDidChange((e: Uri) => this.onChange());
-    }
+  watchViews() {
+    this.watcher = workspace.createFileSystemWatcher(
+      new RelativePattern(activeWorkspace(), "{,**/}{view,views}/{*,**/*}")
+    );
 
-    onChange() {
-        this.timer = setInterval(() => {
-            this.syncViews();
-        }, 5000);
-    }
+    this.watcher.onDidCreate(() => this.onChange());
+    this.watcher.onDidDelete(() => this.onChange());
+    this.watcher.onDidChange(() => this.onChange());
+  }
+
+  onChange() {
+    setInterval(() => {
+      this.syncViews();
+    }, 5000);
+  }
 }

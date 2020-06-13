@@ -1,4 +1,3 @@
-import { Position } from "vscode";
 import { isUndefined, isNull, isString } from "util";
 import { getDefaultModelNamespace } from "../utils";
 
@@ -20,7 +19,7 @@ export default class ModelParser {
       return null;
     }
 
-    const namespace = this.getUseClasses().find((namespace) => {
+    const namespace = this.getUseClasses().find((namespace: string) => {
       return namespace.endsWith(className);
     });
 
@@ -38,11 +37,12 @@ export default class ModelParser {
   }
 
   getUseClasses() {
-    let uses = [];
+    let uses: Array<any> = [];
 
     for (let i = 0; i < this.tokens.length; i++) {
       if (this.tokens[i][0] === "T_USE") {
-        let use = [];
+        let use: Array<any> = [];
+
         for (let j = i + 1; j < this.tokens.length; j++) {
           if (this.tokens[j] === ";") {
             break;
@@ -298,7 +298,7 @@ export default class ModelParser {
   getClassNameFromEquality(variableToken: any): string | null {
     let classNameTokens: Array<any> = [];
 
-    let equalityIndex = null;
+    let equalityIndex: number | null = null;
 
     const tokens = this.tokens.slice(variableToken[3] + 1);
 
