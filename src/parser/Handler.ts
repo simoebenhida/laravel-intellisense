@@ -1,4 +1,4 @@
-import { WorkspaceFolder, workspace, Position } from "vscode";
+import { Position } from "vscode";
 import { isArray } from "util";
 
 export default class Handler {

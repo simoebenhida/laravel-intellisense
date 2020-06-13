@@ -1,4 +1,4 @@
-import { WorkspaceFolder, workspace, Position } from "vscode";
+import { workspace } from "vscode";
 import { isArray, isUndefined } from "util";
 
 export function activeWorkspace(): any {
