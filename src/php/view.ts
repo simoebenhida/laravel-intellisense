@@ -1,7 +1,7 @@
 import PHP from "./index";
 
 export function getViews(): Promise<string> {
-    const script = `
+  const script = `
         function getViewsFromDirectory($directories, $filesystem, $parentDirectory = null)
         {
             $views = [];
@@ -73,5 +73,5 @@ export function getViews(): Promise<string> {
         echo json_encode($views);
     `;
 
-    return PHP.run(script);
+  return PHP.run(script);
 }

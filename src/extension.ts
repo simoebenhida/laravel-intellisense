@@ -41,7 +41,6 @@ export function activate(context: ExtensionContext) {
     )
   );
 
-
   context.subscriptions.push(
     languages.registerCompletionItemProvider(
       DOCUMENT_SELECTOR,
