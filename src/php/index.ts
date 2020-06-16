@@ -6,6 +6,8 @@ import { hasAutoload, hasBootstrapApp } from "./../laravel";
 export default class PHP {
   static phpParser: any = null;
 
+  static running: boolean = false;
+
   static async run(code: string): Promise<string> {
     if (hasAutoload() && hasBootstrapApp()) {
       var script = this.getScript(code);
@@ -23,6 +25,12 @@ export default class PHP {
   }
 
   static async execute(code: string): Promise<string> {
+    if (this.running) {
+      return "";
+    }
+
+    this.running = true;
+
     code = code.replace(/\"/g, '\\"');
 
     if (
@@ -37,8 +45,10 @@ export default class PHP {
 
     var command = 'php -r "' + code + '"';
 
-    return new Promise<string>(function (resolve, error) {
-      cp.exec(command, function (err, stdout, stderr) {
+    return new Promise<string>((resolve, error) => {
+      cp.exec(command, (err, stdout, stderr) => {
+        this.running = false;
+
         if (stdout.length > 0) {
           resolve(stdout);
         } else {

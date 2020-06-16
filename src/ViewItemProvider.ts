@@ -10,9 +10,10 @@ import {
 import { activeWorkspace } from "./utils";
 import { getViews } from "./php/view";
 import Parser from "./parser/index";
+import { isNull } from "util";
 
 export default class ViewItemProvider implements CompletionItemProvider {
-  private views: any = {};
+  private views: any = null;
 
   private watcher: any = null;
 
@@ -22,16 +23,20 @@ export default class ViewItemProvider implements CompletionItemProvider {
     this.watchViews();
   }
 
-  provideCompletionItems(
+  async provideCompletionItems(
     document: TextDocument,
     position: Position
-  ): Array<CompletionItem> {
+  ): Promise<Array<CompletionItem>> {
     let items: Array<CompletionItem> = [];
 
     let hasView = new Parser(document, position).hasView();
 
     if (!hasView) {
       return items;
+    }
+
+    if (isNull(this.views)) {
+      await this.syncViews();
     }
 
     for (let view of this.views) {

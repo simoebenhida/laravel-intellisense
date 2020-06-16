@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import Parser from "./parser/index";
 import { getRouterNames } from "./php/router";
+import { isNull } from "util";
 
 export default class RouterItemProvider {
   private routes: any = null;
@@ -12,13 +13,17 @@ export default class RouterItemProvider {
   async provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position
-  ) {
+  ): Promise<Array<vscode.CompletionItem>> {
     let items: Array<vscode.CompletionItem> = [];
 
     let hasRoute = new Parser(document, position).hasRoute();
 
     if (!hasRoute) {
       return items;
+    }
+
+    if (isNull(this.routes)) {
+      await this.syncRoutes();
     }
 
     for (let route of this.routes) {
