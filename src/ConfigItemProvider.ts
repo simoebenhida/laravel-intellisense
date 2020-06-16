@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import Parser from "./parser/index";
 import { getConfigElements } from "./php/config";
+import { isNull } from "util";
 
 export default class ConfigItemProvider {
   private elements: any = null;
@@ -12,13 +13,17 @@ export default class ConfigItemProvider {
   async provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position
-  ) {
+  ): Promise<Array<vscode.CompletionItem>> {
     let items: Array<vscode.CompletionItem> = [];
 
     let hasConfig = new Parser(document, position).hasConfig();
 
     if (!hasConfig) {
       return items;
+    }
+
+    if (isNull(this.elements)) {
+      await this.syncConfig();
     }
 
     for (let element of this.elements) {
