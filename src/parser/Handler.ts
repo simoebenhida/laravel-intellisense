@@ -121,7 +121,28 @@ export default class Handler {
   }
 
   hasAlias(): boolean {
-    return this.getAliasToken().length > 0;
+    return this.checkForAlias();
+  }
+
+  checkForAlias(): boolean {
+    const tokens = this.tokensOnTheSameLine();
+
+    // Remove TRIGGER_CHARACTERS
+    tokens.shift();
+
+    if (tokens.length === 0) {
+      return false;
+    }
+
+    if (this.aliases.includes(tokens[0][1])) {
+      return true;
+    }
+
+    if (this.aliases.includes(this.tokensToString(tokens))) {
+      return true;
+    }
+
+    return false;
   }
 
   getAliasToken(): Array<any> {
@@ -147,5 +168,15 @@ export default class Handler {
         return token[2] === this.position.line + 1;
       })
       .reverse();
+  }
+
+  tokensToString(tokens: Array<string>) {
+    return tokens
+      .map((token) => {
+        return token[1];
+      })
+      .reverse()
+      .join("")
+      .trim();
   }
 }
