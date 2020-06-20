@@ -2,7 +2,7 @@
   "name": "laravel-intellisense",
   "displayName": "laravel intellisense",
   "description": "Laravel intellisense for Visual Studio Code",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "publisher": "mohamedbenhida",
   "icon": "img/laravel.png",
   "engines": {
