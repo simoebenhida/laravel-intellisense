@@ -38,6 +38,8 @@ export default class Parser {
 
   routeAliases: Array<string> = ["route"];
 
+  translateAliases: Array<string>  = ["__", "trans", "trans_choice"];
+
   document: TextDocument;
 
   position: Position;
@@ -118,6 +120,12 @@ export default class Parser {
 
   hasView() {
     const handler = new Handler(this.tokens, this.position, this.viewAliases);
+
+    return handler.hasAlias();
+  }
+
+  hasTranslation() {
+    const handler = new Handler(this.tokens, this.position, this.translateAliases);
 
     return handler.hasAlias();
   }

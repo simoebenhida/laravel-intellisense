@@ -5,6 +5,7 @@ import ModelItemProvider from "./ModelItemProvider";
 import LaravelIdeHelper from "./php/laravelIdeHelper";
 import ConfigItemProvider from "./ConfigItemProvider";
 import RouterItemProvider from "./RouterItemProvider";
+import TranslationItemProvider from "./TranslationItemProvider";
 
 export function activate(context: ExtensionContext) {
   if (!hasArtisan()) {
@@ -45,6 +46,14 @@ export function activate(context: ExtensionContext) {
     languages.registerCompletionItemProvider(
       DOCUMENT_SELECTOR,
       new RouterItemProvider(),
+      ...TRIGGER_CHARACTERS
+    )
+  );
+
+  context.subscriptions.push(
+    languages.registerCompletionItemProvider(
+      DOCUMENT_SELECTOR,
+      new TranslationItemProvider(),
       ...TRIGGER_CHARACTERS
     )
   );
