@@ -3,14 +3,14 @@ import { getModelAttributes } from "./php/model";
 import Parser from "./parser/index";
 import { isNull } from "util";
 
+interface Attributes {
+  [key: string]: Array<string>;
+}
+
 export default class ModelItemProvider {
-  private attributes: any = {};
+  private attributes: Attributes = {};
 
-  private model: string | null = null;
-
-  constructor() {
-    this.attributes = {};
-  }
+  private model: string | null = "";
 
   async provideCompletionItems(
     document: vscode.TextDocument,
@@ -18,19 +18,17 @@ export default class ModelItemProvider {
   ) {
     let items: Array<vscode.CompletionItem> = [];
 
-    let model = new Parser(document, position).getClassName();
+    this.model = new Parser(document, position).getClassName();
 
-    if (isNull(model)) {
+    if (isNull(this.model)) {
       return items;
     }
 
-    if (this.model !== model) {
-      this.model = model;
-
+    if (!this.attributes.hasOwnProperty(this.model)) {
       await this.syncModel();
     }
 
-    for (let attribute of this.attributes) {
+    for (let attribute of this.attributes[this.model]) {
       const item = new vscode.CompletionItem(
         attribute,
         vscode.CompletionItemKind.Constant
@@ -48,14 +46,12 @@ export default class ModelItemProvider {
   }
 
   async syncModel() {
-    this.attributes = [];
-
     if (isNull(this.model)) {
       return;
     }
 
-    await getModelAttributes(this.model).then((attributes: any) => {
-      this.attributes = JSON.parse(attributes);
-    });
+    const attributes = await getModelAttributes(this.model);
+
+    this.attributes[this.model] = JSON.parse(attributes);
   }
 }

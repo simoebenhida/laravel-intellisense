@@ -68,14 +68,6 @@ export default class PHP {
       "$app = require_once '" +
       path("bootstrap/app.php") +
       "';" +
-      "class ServiceProvider extends \\Illuminate\\Support\\ServiceProvider" +
-      "{" +
-      "	public function boot()" +
-      "	{" +
-      "		$this->app['log']->setHandlers([new \\Monolog\\Handler\\NullHandler()]);" +
-      "	}" +
-      "}" +
-      "$app->register(new ServiceProvider($app));" +
       "$kernel = $app->make(Illuminate\\Contracts\\Console\\Kernel::class);" +
       "$status = $kernel->handle(" +
       "$input = new Symfony\\Component\\Console\\Input\\ArgvInput," +
