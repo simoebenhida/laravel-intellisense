@@ -10,6 +10,7 @@
   - [View Autocompletion](#view-autocompletion)
   - [Config Autocompletion](#config-autocompletion)
   - [Route Autocompletion](#route-autocompletion)
+  - [Translate Autocompletion](#translate-autocompletion)
   - [Configuration](#configuration)
 
 ## Laravel Ide helper
@@ -50,6 +51,10 @@ For resource autocompletion to work you will have to specify model namespace on 
 ## Route Autocompletion
 
 <p align="center"><img src="https://user-images.githubusercontent.com/19809072/83811472-cacbd680-a6b1-11ea-889d-8be00e465bc5.png" alt="model"></p>
+
+## Translate Autocompletion
+
+<p align="center"><img src="https://user-images.githubusercontent.com/19809072/85328628-f67bf880-b4c8-11ea-8819-947f255b825c.png" alt="model"></p>
 
 ## Configuration
 For the extension to work you need to have the database working! Since it needs the database to get the attributes.
