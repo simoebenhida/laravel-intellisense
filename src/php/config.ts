@@ -38,7 +38,7 @@ export function getConfigElements() {
             public function all(): array
             {
                 return $this->items->filter(function ($config, $key) {
-                    return strpos($config, 'app.providers') === false && strpos($config, 'filesystems.links') === false;
+                    return strpos($config, 'app.providers') === false && strpos($config, 'filesystems.links') === false && strpos($config, 'app.aliases') === false;
                 })->toArray();
             }
         }
