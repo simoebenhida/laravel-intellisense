@@ -40,7 +40,13 @@
           "scope": "resource",
           "default": "App\\Models",
           "description": "The model namespace."
-        }
+        },
+        "LaravelIntellisense.docker": {
+            "type": "string",
+            "scope": "docker",
+            "default": null,
+            "description": "Docker script."
+          }
       }
     }
   },
