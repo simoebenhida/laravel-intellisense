@@ -2,15 +2,30 @@ import PHP from "./index";
 
 export function getRouterNames() {
   const script = `
-        $routers = app('router')->getRoutes();
+        function getRoutes($routers)
+        {
+            $routes = [];
 
-        $names = [];
+            if (is_array($routers)) {
+                foreach ($routers as $key => $router) {
+                    if (array_key_exists('as', $router['action'])) {
+                        $routes[] = $router['action']['as'];
+                    }
+                }
 
-        foreach ($routers as $router) {
-            $names[] = $router->getName();
+                return $routes;
+            }
+
+            foreach ($routers as $router) {
+                $routes[] = $router->getName();
+            }
+
+            return $routes;
         }
 
-        echo json_encode(array_filter($names));
+        $routers = app('router')->getRoutes();
+
+        echo json_encode(array_filter(getRoutes($routers)));
     `;
 
   return PHP.run(script);
