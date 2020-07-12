@@ -11,6 +11,7 @@
   - [Config Autocompletion](#config-autocompletion)
   - [Route Autocompletion](#route-autocompletion)
   - [Translate Autocompletion](#translate-autocompletion)
+  - [Docker Support](#docker)
   - [Configuration](#configuration)
 
 ## Laravel Ide helper
@@ -24,7 +25,7 @@ Generate Ide Helper
 Or you can use the package directly to make it customizable with your project[laravel-ide-helper](https://github.com/barryvdh/laravel-ide-helper)
 
 ## Resource Autocompletion
-For resource autocompletion to work you will have to specify model namespace on `Extensions>Laravel Intellisense>Model namespace` by default it is `App\`
+For resource autocompletion to work you will have to specify model namespace on `Settings>Extensions>Laravel Intellisense>Model namespace` by default it is `App\`
 
 <p align="center"><img src="https://user-images.githubusercontent.com/19809072/83809978-47a98100-a6af-11ea-905c-2ee360b43948.png" alt="resource"></p>
 
@@ -56,5 +57,15 @@ For resource autocompletion to work you will have to specify model namespace on 
 
 <p align="center"><img src="https://user-images.githubusercontent.com/19809072/85328628-f67bf880-b4c8-11ea-8819-947f255b825c.png" alt="model"></p>
 
+## Docker
+
+If you are using docker you will have to add the container name where your application lives in `Settings>Extensions>Laravel Intellisense>Docker` so the extension can run the script from there to get the attributes!
+
+For example if im using an `app` container! I will be adding: 
+```
+    docker exec app
+```
+
 ## Configuration
+
 For the extension to work you need to have the database working! Since it needs the database to get the attributes.
