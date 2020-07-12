@@ -63,7 +63,7 @@ If you are using docker you will have to add the container name where your appli
 
 For example if im using an `app` container! I will be adding: 
 ```
-    docker exec app
+docker exec app
 ```
 
 ## Configuration
