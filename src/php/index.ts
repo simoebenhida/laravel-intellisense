@@ -2,6 +2,7 @@ import { path } from "./../utils";
 import * as cp from "child_process";
 import * as os from "os";
 import { hasAutoload, hasBootstrapApp } from "./../laravel";
+import { workspace } from "vscode";
 
 export default class PHP {
   static phpParser: any = null;
@@ -43,7 +44,7 @@ export default class PHP {
       code = code.replace(/\\\\"/g, '\\\\\\\\"');
     }
 
-    var command = 'php -r "' + code + '"';
+    var command = this.getCommand() + '"' + code + '"';
 
     return new Promise<string>((resolve, error) => {
       cp.exec(command, (err, stdout, stderr) => {
@@ -63,10 +64,10 @@ export default class PHP {
     return (
       "define('LARAVEL_START', microtime(true));" +
       "require_once '" +
-      path("vendor/autoload.php") +
+      this.filePath("vendor/autoload.php") +
       "';" +
       "$app = require_once '" +
-      path("bootstrap/app.php") +
+      this.filePath("bootstrap/app.php") +
       "';" +
       "$kernel = $app->make(Illuminate\\Contracts\\Console\\Kernel::class);" +
       "$status = $kernel->handle(" +
@@ -77,5 +78,29 @@ export default class PHP {
       code +
       "echo '___END_OUTPUT___';"
     );
+  }
+
+  static getCommand() {
+    if (this.isDocker()) {
+      return this.getDockerscript() + " php -r";
+    }
+
+    return "php -r";
+  }
+
+  static filePath(file: string) {
+    if (this.isDocker()) {
+      return `./${file}`;
+    }
+
+    return path(file);
+  }
+
+  static isDocker(): boolean {
+    return !!this.getDockerscript();
+  }
+
+  static getDockerscript(): string | undefined {
+    return workspace.getConfiguration("LaravelIntellisense").get("docker");
   }
 }
