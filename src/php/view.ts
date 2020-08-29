@@ -23,6 +23,9 @@ export function getViews(): Promise<string> {
 
 
                 foreach ($filesystem->files($directory) as $file) {
+                    if (!is_object($file) || !method_exists($file, 'getBaseName')) {
+                        continue;
+                    }
                     if (strpos($file->getBaseName(), '.blade.php')) {
                         $fileName = str_replace('.blade.php', '', $file->getBaseName());
                         $views[] = $viewDirectory . '.' . $fileName;
@@ -38,6 +41,9 @@ export function getViews(): Promise<string> {
             $views = [];
 
             foreach ($filesystem->files($path) as $file) {
+                if (!is_object($file) || !method_exists($file, 'getBaseName')) {
+                    continue;
+                }
                 if (strpos($file->getBaseName(), '.blade.php')) {
                     $fileName = str_replace('.blade.php', '', $file->getBaseName());
 
