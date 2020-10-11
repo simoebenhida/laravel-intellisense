@@ -17,7 +17,7 @@ export function path(path: string): string {
   let workspace = activeWorkspace();
 
   if ("uri" in workspace) {
-    return workspace.uri.path + "/" + path;
+    return workspace.uri.fsPath + "/" + path;
   }
 
   return "";
