@@ -45,6 +45,9 @@ export default class TranslationItemProvider {
 
   async syncTranslations() {
     const translations = await getTranslations();
+    if (!translations) {
+      return;
+    }
 
     this.translations = Object.values(JSON.parse(translations));
   }

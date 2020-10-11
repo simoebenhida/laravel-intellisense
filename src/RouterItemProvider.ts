@@ -45,6 +45,10 @@ export default class RouterItemProvider {
 
   async syncRoutes() {
     await getRouterNames().then((routes) => {
+      if (!routes) {
+        return;
+      }
+
       this.routes = Object.values(JSON.parse(routes));
     });
   }
