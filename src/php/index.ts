@@ -61,23 +61,17 @@ export default class PHP {
   }
 
   static getScript(code: string): string {
-    return (
-      "define('LARAVEL_START', microtime(true));" +
-      "require_once '" +
-      this.filePath("vendor/autoload.php") +
-      "';" +
-      "$app = require_once '" +
-      this.filePath("bootstrap/app.php") +
-      "';" +
-      "$kernel = $app->make(Illuminate\\Contracts\\Console\\Kernel::class);" +
-      "$status = $kernel->handle(" +
-      "$input = new Symfony\\Component\\Console\\Input\\ArgvInput," +
-      "new Symfony\\Component\\Console\\Output\\ConsoleOutput" +
-      ");" +
-      "echo '___OUTPUT___';" +
-      code +
-      "echo '___END_OUTPUT___';"
-    );
+      return `
+        define('LARAVEL_START', microtime(true));
+        require_once '${this.filePath("vendor/autoload.php")}';
+        $app = require_once '${this.filePath("bootstrap/app.php")}';
+        $kernel = $app->make(Illuminate\\Contracts\\Console\\Kernel::class);
+        $status = $kernel->handle($input = new Symfony\\Component\\Console\\Input\\ArgvInput,
+            new Symfony\\Component\\Console\\Output\\ConsoleOutput);
+        echo '___OUTPUT___';
+        ${code}
+        echo '___END_OUTPUT___';
+      `;
   }
 
   static getCommand() {
