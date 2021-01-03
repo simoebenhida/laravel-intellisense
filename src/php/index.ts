@@ -46,31 +46,16 @@ export default class PHP {
 
     var command = this.getCommand() + '"' + code + '"';
 
-    return new Promise<string>((resolve, error) => {
-      let records:string = ''
-
-      let errRecord:string = ''
-
-      const child = cp.spawn(command, {
-        shell: true
-      });
-
-      child.stdout.on('data', (data) => {
-        records += `${data}`;
-      })
-
-      child.stderr.on('data', (data) => {
-        errRecord += `${data}`;
-      })
-
-
-      child.on('close', (code) => {
-        if (code === 0) {
-          resolve(records)
-
+    return new Promise<string>(async (resolve, error) => {
+      cp.exec(command, {
+        windowsHide: true
+      }, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`exec error: ${error}`);
           return;
         }
-        error(errRecord)
+        console.log(`stdout: ${stdout}`);
+        console.error(`stderr: ${stderr}`);
       });
     });
   }
