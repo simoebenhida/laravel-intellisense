@@ -16,7 +16,7 @@ export default class PHP {
       var out: string | null | RegExpExecArray = await this.execute(script);
 
       out = /___OUTPUT___(.*)___END_OUTPUT___/g.exec(out);
-
+      console.log(out)
       if (out) {
         return out[1];
       }
@@ -47,15 +47,30 @@ export default class PHP {
     var command = this.getCommand() + '"' + code + '"';
 
     return new Promise<string>((resolve, error) => {
-      cp.exec(command, (err, stdout, stderr) => {
-        this.running = false;
+      let records:string = ''
 
-        if (stdout.length > 0) {
-          resolve(stdout);
-        } else {
-          console.error(err);
-          error(stderr);
+      let errRecord:string = ''
+
+      const child = cp.spawn(command, {
+        shell: true
+      });
+
+      child.stdout.on('data', (data) => {
+        records += `${data}`;
+      })
+
+      child.stderr.on('data', (data) => {
+        errRecord += `${data}`;
+      })
+
+
+      child.on('close', (code) => {
+        if (code === 0) {
+          resolve(records)
+
+          return;
         }
+        error(errRecord)
       });
     });
   }
