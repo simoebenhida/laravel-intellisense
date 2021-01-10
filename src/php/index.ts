@@ -74,9 +74,7 @@ export default class PHP {
       "$input = new Symfony\\Component\\Console\\Input\\ArgvInput," +
       "new Symfony\\Component\\Console\\Output\\ConsoleOutput" +
       ");" +
-      "echo '___OUTPUT___';" +
-      code +
-      "echo '___END_OUTPUT___';"
+      "echo '___OUTPUT___';" + code + "echo '___END_OUTPUT___';"
     );
   }
 
