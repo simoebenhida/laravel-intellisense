@@ -1,10 +1,9 @@
 import * as vscode from "vscode";
 import Parser from "./parser/index";
 import { getTranslations } from "./php/translation";
-import { isNull } from "util";
 
 export default class TranslationItemProvider {
-  private translations: any = null;
+  private translations: string[] | null = null;
 
   constructor() {
     this.syncTranslations();
@@ -13,20 +12,24 @@ export default class TranslationItemProvider {
   async provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position
-  ): Promise<Array<vscode.CompletionItem>> {
-    let items: Array<vscode.CompletionItem> = [];
+  ): Promise<vscode.CompletionItem[]> {
+    const items: vscode.CompletionItem[] = [];
 
-    let hasTranslation = new Parser(document, position).hasTranslation();
+    const hasTranslation = new Parser(document, position).hasTranslation();
 
     if (!hasTranslation) {
       return items;
     }
 
-    if (isNull(this.translations)) {
+    if (this.translations === null) {
       await this.syncTranslations();
     }
 
-    for (let translation of this.translations) {
+    if (this.translations === null) {
+      return items;
+    }
+
+    for (const translation of this.translations) {
       const item = new vscode.CompletionItem(
         translation,
         vscode.CompletionItemKind.Constant
@@ -43,12 +46,18 @@ export default class TranslationItemProvider {
     return items;
   }
 
-  async syncTranslations() {
+  async syncTranslations(): Promise<void> {
     const translations = await getTranslations();
-    if (!translations) {
-      return;
-    }
 
-    this.translations = Object.values(JSON.parse(translations));
+    if (translations) {
+      try {
+        this.translations = Object.values(
+          JSON.parse(translations)
+        ) as string[];
+      } catch {
+        // Silently fail on invalid JSON
+        this.translations = null;
+      }
+    }
   }
 }

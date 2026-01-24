@@ -4,89 +4,102 @@ import * as os from "os";
 import { hasAutoload, hasBootstrapApp } from "./../laravel";
 import { workspace } from "vscode";
 
+const EXECUTION_TIMEOUT = 30000; // 30 seconds timeout
+
 export default class PHP {
-  static phpParser: any = null;
-
-  static running: boolean = false;
-
   static async run(code: string): Promise<string> {
-    if (hasAutoload() && hasBootstrapApp()) {
-      var script = this.getScript(code);
-
-      var out: string | null | RegExpExecArray = await this.execute(script);
-
-      out = /___OUTPUT___(.*)___END_OUTPUT___/g.exec(out);
-
-      if (out) {
-        return out[1];
-      }
-    }
-
-    return "";
-  }
-
-  static async execute(code: string): Promise<string> {
-    if (this.running) {
+    if (!hasAutoload() || !hasBootstrapApp()) {
       return "";
     }
 
-    this.running = true;
+    try {
+      const script = this.getScript(code);
+      const output = await this.execute(script);
+      const match = /___OUTPUT___(.*)___END_OUTPUT___/g.exec(output);
 
-    code = code.replace(/\"/g, '\\"');
-
-    if (
-      ["linux", "openbsd", "sunos", "darwin"].some((unixPlatforms) =>
-        os.platform().includes(unixPlatforms)
-      )
-    ) {
-      code = code.replace(/\$/g, "\\$");
-      code = code.replace(/\\\\'/g, "\\\\\\\\'");
-      code = code.replace(/\\\\"/g, '\\\\\\\\"');
+      return match ? match[1] : "";
+    } catch {
+      // Silently fail - don't spam logs when PHP execution fails
+      // This can happen when the project is configured for Docker-only execution
+      return "";
     }
+  }
 
-    var command = this.getCommand() + '"' + code + '"';
+  static async execute(code: string): Promise<string> {
+    const escapedCode = this.escapeForShell(code);
+    const command = this.getCommand() + '"' + escapedCode + '"';
+    const workingDir = this.getWorkingDirectory();
 
-    return new Promise<string>((resolve, error) => {
-      cp.exec(command, (err, stdout, stderr) => {
-        this.running = false;
+    return new Promise<string>((resolve) => {
+      const options: cp.ExecOptions = {
+        timeout: EXECUTION_TIMEOUT,
+        maxBuffer: 1024 * 1024, // 1MB buffer
+      };
 
-        if (stdout.length > 0) {
-          resolve(stdout);
-        } else {
-          console.error(err);
-          error(stderr);
+      if (workingDir) {
+        options.cwd = workingDir;
+      }
+
+      cp.exec(command, options, (err, stdout) => {
+        // Always resolve, never reject - prevents unhandled rejection errors
+        // and stops log spamming when PHP is not available or misconfigured
+        const output = stdout?.toString() ?? "";
+        if (err || output.length === 0) {
+          resolve("");
+          return;
         }
+        resolve(output);
       });
     });
   }
 
-  static getScript(code: string): string {
-    return (
-      "define('LARAVEL_START', microtime(true));" +
-      "require_once '" +
-      this.filePath("vendor/autoload.php") +
-      "';" +
-      "$app = require_once '" +
-      this.filePath("bootstrap/app.php") +
-      "';" +
-      "$kernel = $app->make(Illuminate\\Contracts\\Console\\Kernel::class);" +
-      "$status = $kernel->handle(" +
-      "$input = new Symfony\\Component\\Console\\Input\\ArgvInput," +
-      "new Symfony\\Component\\Console\\Output\\ConsoleOutput" +
-      ");" +
-      "echo '___OUTPUT___';" + code + "echo '___END_OUTPUT___';"
-    );
-  }
+  static escapeForShell(code: string): string {
+    let escaped = code.replace(/"/g, '\\"');
 
-  static getCommand() {
-    if (this.isDocker()) {
-      return this.getDockerscript() + " php -r";
+    const isUnix = ["linux", "openbsd", "sunos", "darwin"].includes(
+      os.platform()
+    );
+
+    if (isUnix) {
+      escaped = escaped.replace(/\$/g, "\\$");
+      escaped = escaped.replace(/\\\\'/g, "\\\\\\\\'");
+      escaped = escaped.replace(/\\\\"/g, '\\\\\\\\"');
     }
 
-    return "php -r";
+    return escaped;
   }
 
-  static filePath(file: string) {
+  static getScript(code: string): string {
+    const autoloadPath = this.filePath("vendor/autoload.php");
+    const bootstrapPath = this.filePath("bootstrap/app.php");
+
+    return `
+      error_reporting(0);
+      define('LARAVEL_START', microtime(true));
+      require_once '${autoloadPath}';
+      $app = require_once '${bootstrapPath}';
+      $kernel = $app->make(Illuminate\\Contracts\\Console\\Kernel::class);
+      $status = $kernel->handle(
+        $input = new Symfony\\Component\\Console\\Input\\ArgvInput,
+        new Symfony\\Component\\Console\\Output\\ConsoleOutput
+      );
+      echo '___OUTPUT___';
+      ${code}
+      echo '___END_OUTPUT___';
+    `;
+  }
+
+  static getCommand(): string {
+    const phpPath = this.getPhpPath();
+
+    if (this.isDocker()) {
+      return this.getDockerCommand() + ` ${phpPath} -r `;
+    }
+
+    return `${phpPath} -r `;
+  }
+
+  static filePath(file: string): string {
     if (this.isDocker()) {
       return `./${file}`;
     }
@@ -94,11 +107,22 @@ export default class PHP {
     return path(file);
   }
 
-  static isDocker(): boolean {
-    return !!this.getDockerscript();
+  static getWorkingDirectory(): string | undefined {
+    const workspacePath = path("");
+    return workspacePath ? workspacePath.replace(/\/$/, "") : undefined;
   }
 
-  static getDockerscript(): string | undefined {
+  static isDocker(): boolean {
+    return !!this.getDockerCommand();
+  }
+
+  static getDockerCommand(): string | undefined {
     return workspace.getConfiguration("LaravelIntellisense").get("docker");
+  }
+
+  static getPhpPath(): string {
+    return (
+      workspace.getConfiguration("LaravelIntellisense").get("phpPath") || "php"
+    );
   }
 }

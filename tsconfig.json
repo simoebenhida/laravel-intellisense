@@ -1,16 +1,20 @@
 {
 	"compilerOptions": {
 		"module": "commonjs",
-		"target": "es2019",
-		"lib": ["ES2019"],
+		"target": "ES2022",
+		"lib": ["ES2022"],
 		"outDir": "out",
 		"sourceMap": true,
 		"strict": true,
-		"rootDir": "src"
+		"rootDir": "src",
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true
 	},
 	"include": [
-		"src/**/*.ts",
-		"./node_modules/vscode/vscode.d.ts",
-		"./node_modules/vscode/lib/*",
+		"src/**/*.ts"
+	],
+	"exclude": [
+		"node_modules"
 	]
 }

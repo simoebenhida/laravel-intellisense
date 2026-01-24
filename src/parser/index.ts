@@ -5,10 +5,10 @@ import { phpParserTokens } from "../utils";
 import Handler from "./Handler";
 import FactoryParser from "./FactoryParser";
 
-export default class Parser {
-  cachedParseFunction: any = null;
+type Token = [string, string, number, number] | string;
 
-  viewAliases: Array<string> = [
+export default class Parser {
+  viewAliases: string[] = [
     "view",
     "markdown",
     "links",
@@ -18,7 +18,7 @@ export default class Parser {
     "@each",
   ];
 
-  queryAliases: Array<string> = [
+  queryAliases: string[] = [
     "where",
     "get",
     "firstWhere",
@@ -34,17 +34,17 @@ export default class Parser {
     "qualifyColumn",
   ];
 
-  configAliases: Array<string> = ["config", "Config::get"];
+  configAliases: string[] = ["config", "Config::get"];
 
-  routeAliases: Array<string> = ["route"];
+  routeAliases: string[] = ["route"];
 
-  translateAliases: Array<string>  = ["__", "trans", "trans_choice"];
+  translateAliases: string[] = ["__", "trans", "trans_choice"];
 
   document: TextDocument;
 
   position: Position;
 
-  tokens: Array<any> = [];
+  tokens: Token[] = [];
 
   constructor(document: TextDocument, position: Position) {
     this.document = document;
@@ -54,11 +54,11 @@ export default class Parser {
     this.tokens = this.parseTokens();
   }
 
-  parseTokens() {
+  parseTokens(): Token[] {
     return phpParserTokens(this.document.getText());
   }
 
-  getClassName() {
+  getClassName(): string | null {
     const handler = new Handler(this.tokens, this.position, this.queryAliases);
 
     const eloquentAliasToken = handler.getEloquentAliasToken();
@@ -67,7 +67,7 @@ export default class Parser {
       return this.hasModel(eloquentAliasToken);
     }
 
-    let resourceAliasToken = handler.getResourceAliasToken();
+    const resourceAliasToken = handler.getResourceAliasToken();
 
     if (resourceAliasToken.length) {
       return this.hasResource(resourceAliasToken);
@@ -82,50 +82,48 @@ export default class Parser {
     return null;
   }
 
-  hasModel(aliasToken: Array<any>) {
+  hasModel(aliasToken: Token[]): string | null {
     const modelParser = new ModelParser(this.tokens, aliasToken);
 
-    const className = modelParser.getFullClassName();
-
-    return className;
+    return modelParser.getFullClassName();
   }
 
-  hasResource(aliasToken: Array<any>) {
+  hasResource(aliasToken: Token[]): string | null {
     const modelParser = new ResourceParser(this.tokens, aliasToken);
 
-    const className = modelParser.getFullClassName();
-
-    return className;
+    return modelParser.getFullClassName();
   }
 
-  hasFactory(aliasToken: Array<any>) {
+  hasFactory(aliasToken: Token[]): string | null {
     const modelParser = new FactoryParser(this.tokens, aliasToken);
 
-    const className = modelParser.getFullClassName();
-
-    return className;
+    return modelParser.getFullClassName();
   }
 
-  hasConfig() {
+  hasConfig(): boolean {
     const handler = new Handler(this.tokens, this.position, this.configAliases);
 
     return handler.hasAlias();
   }
 
-  hasRoute() {
+  hasRoute(): boolean {
     const handler = new Handler(this.tokens, this.position, this.routeAliases);
 
     return handler.hasAlias();
   }
 
-  hasView() {
+  hasView(): boolean {
     const handler = new Handler(this.tokens, this.position, this.viewAliases);
 
     return handler.hasAlias();
   }
 
-  hasTranslation() {
-    const handler = new Handler(this.tokens, this.position, this.translateAliases);
+  hasTranslation(): boolean {
+    const handler = new Handler(
+      this.tokens,
+      this.position,
+      this.translateAliases
+    );
 
     return handler.hasAlias();
   }

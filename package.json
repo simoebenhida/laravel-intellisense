@@ -2,17 +2,17 @@
   "name": "laravel-intellisense",
   "displayName": "laravel intellisense",
   "description": "Laravel intellisense for Visual Studio Code",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "publisher": "mohamedbenhida",
   "icon": "img/laravel.png",
   "engines": {
-    "vscode": "^1.44.0"
+    "vscode": "^1.74.0"
   },
   "categories": [
     "Other"
   ],
   "activationEvents": [
-    "*"
+    "workspaceContains:artisan"
   ],
   "keywords": [
     "php",
@@ -43,16 +43,22 @@
         },
         "LaravelIntellisense.docker": {
           "type": "string",
-          "scope": "docker",
+          "scope": "resource",
           "default": null,
-          "description": "Docker script."
+          "description": "Docker command prefix (e.g., 'docker exec app' or 'sail')."
+        },
+        "LaravelIntellisense.phpPath": {
+          "type": "string",
+          "scope": "resource",
+          "default": "php",
+          "description": "Path to the PHP executable."
         }
       }
     }
   },
   "scripts": {
     "vscode:prepublish": "webpack --mode production",
-    "compile": "tsc -watch",
+    "compile": "tsc -p ./",
     "test-compile": "tsc -p ./",
     "watch": "webpack --mode none --watch",
     "lint": "eslint src --ext ts",
@@ -60,23 +66,22 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/glob": "^7.1.1",
-    "@types/mocha": "^7.0.2",
-    "@types/node": "^13.11.0",
-    "@types/vscode": "^1.44.0",
-    "@typescript-eslint/eslint-plugin": "^2.30.0",
-    "@typescript-eslint/parser": "^2.30.0",
-    "eslint": "^6.8.0",
-    "glob": "^7.1.6",
-    "mocha": "^7.1.2",
-    "ts-loader": "^7.0.5",
-    "typescript": "^3.8.3",
-    "vscode-test": "^1.4.0",
-    "webpack": "^4.43.0",
-    "webpack-cli": "^3.3.11",
-    "ts-node": "^8.10.2"
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "@vscode/test-electron": "^2.3.9",
+    "eslint": "^8.56.0",
+    "glob": "^10.3.10",
+    "mocha": "^10.2.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.3.3",
+    "webpack": "^5.89.0",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "php-parser": "^3.0.1"
+    "php-parser": "^3.1.5"
   }
 }

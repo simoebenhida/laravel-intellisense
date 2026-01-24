@@ -1,10 +1,9 @@
 import * as vscode from "vscode";
 import Parser from "./parser/index";
 import { getConfigElements } from "./php/config";
-import { isNull } from "util";
 
 export default class ConfigItemProvider {
-  private elements: any = null;
+  private elements: string[] | null = null;
 
   constructor() {
     this.syncConfig();
@@ -13,20 +12,24 @@ export default class ConfigItemProvider {
   async provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position
-  ): Promise<Array<vscode.CompletionItem>> {
-    let items: Array<vscode.CompletionItem> = [];
+  ): Promise<vscode.CompletionItem[]> {
+    const items: vscode.CompletionItem[] = [];
 
-    let hasConfig = new Parser(document, position).hasConfig();
+    const hasConfig = new Parser(document, position).hasConfig();
 
     if (!hasConfig) {
       return items;
     }
 
-    if (isNull(this.elements)) {
+    if (this.elements === null) {
       await this.syncConfig();
     }
 
-    for (let element of this.elements) {
+    if (this.elements === null) {
+      return items;
+    }
+
+    for (const element of this.elements) {
       const item = new vscode.CompletionItem(
         element,
         vscode.CompletionItemKind.Constant
@@ -43,13 +46,16 @@ export default class ConfigItemProvider {
     return items;
   }
 
-  async syncConfig() {
-    await getConfigElements().then((elements) => {
-      if (!elements) {
-        return;
-      }
+  async syncConfig(): Promise<void> {
+    const elements = await getConfigElements();
 
-      this.elements = Object.values(JSON.parse(elements));
-    });
+    if (elements) {
+      try {
+        this.elements = Object.values(JSON.parse(elements)) as string[];
+      } catch {
+        // Silently fail on invalid JSON
+        this.elements = null;
+      }
+    }
   }
 }

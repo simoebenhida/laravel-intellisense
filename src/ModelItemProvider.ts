@@ -1,10 +1,9 @@
 import * as vscode from "vscode";
 import { getModelAttributes } from "./php/model";
 import Parser from "./parser/index";
-import { isNull } from "util";
 
 interface Attributes {
-  [key: string]: Array<string>;
+  [key: string]: string[];
 }
 
 export default class ModelItemProvider {
@@ -15,20 +14,24 @@ export default class ModelItemProvider {
   async provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position
-  ) {
-    let items: Array<vscode.CompletionItem> = [];
+  ): Promise<vscode.CompletionItem[]> {
+    const items: vscode.CompletionItem[] = [];
 
     this.model = new Parser(document, position).getClassName();
 
-    if (isNull(this.model)) {
+    if (this.model === null) {
       return items;
     }
 
-    if (!this.attributes.hasOwnProperty(this.model)) {
+    if (!Object.prototype.hasOwnProperty.call(this.attributes, this.model)) {
       await this.syncModel();
     }
 
-    for (let attribute of this.attributes[this.model]) {
+    if (this.model === null || !this.attributes[this.model]) {
+      return items;
+    }
+
+    for (const attribute of this.attributes[this.model]) {
       const item = new vscode.CompletionItem(
         attribute,
         vscode.CompletionItemKind.Constant
@@ -45,13 +48,19 @@ export default class ModelItemProvider {
     return items;
   }
 
-  async syncModel() {
-    if (isNull(this.model)) {
+  async syncModel(): Promise<void> {
+    if (this.model === null) {
       return;
     }
 
     const attributes = await getModelAttributes(this.model);
 
-    this.attributes[this.model] = JSON.parse(attributes);
+    if (attributes) {
+      try {
+        this.attributes[this.model] = JSON.parse(attributes);
+      } catch {
+        // Silently fail on invalid JSON
+      }
+    }
   }
 }

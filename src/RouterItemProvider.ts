@@ -1,10 +1,9 @@
 import * as vscode from "vscode";
 import Parser from "./parser/index";
 import { getRouterNames } from "./php/router";
-import { isNull } from "util";
 
 export default class RouterItemProvider {
-  private routes: any = null;
+  private routes: string[] | null = null;
 
   constructor() {
     this.syncRoutes();
@@ -13,20 +12,24 @@ export default class RouterItemProvider {
   async provideCompletionItems(
     document: vscode.TextDocument,
     position: vscode.Position
-  ): Promise<Array<vscode.CompletionItem>> {
-    let items: Array<vscode.CompletionItem> = [];
+  ): Promise<vscode.CompletionItem[]> {
+    const items: vscode.CompletionItem[] = [];
 
-    let hasRoute = new Parser(document, position).hasRoute();
+    const hasRoute = new Parser(document, position).hasRoute();
 
     if (!hasRoute) {
       return items;
     }
 
-    if (isNull(this.routes)) {
+    if (this.routes === null) {
       await this.syncRoutes();
     }
 
-    for (let route of this.routes) {
+    if (this.routes === null) {
+      return items;
+    }
+
+    for (const route of this.routes) {
       const item = new vscode.CompletionItem(
         route,
         vscode.CompletionItemKind.Constant
@@ -43,13 +46,16 @@ export default class RouterItemProvider {
     return items;
   }
 
-  async syncRoutes() {
-    await getRouterNames().then((routes) => {
-      if (!routes) {
-        return;
-      }
+  async syncRoutes(): Promise<void> {
+    const routes = await getRouterNames();
 
-      this.routes = Object.values(JSON.parse(routes));
-    });
+    if (routes) {
+      try {
+        this.routes = Object.values(JSON.parse(routes)) as string[];
+      } catch {
+        // Silently fail on invalid JSON
+        this.routes = null;
+      }
+    }
   }
 }

@@ -6,16 +6,18 @@ import {
   CompletionItemKind,
   RelativePattern,
   workspace,
+  FileSystemWatcher,
 } from "vscode";
 import { activeWorkspace } from "./utils";
 import { getViews } from "./php/view";
 import Parser from "./parser/index";
-import { isNull } from "util";
 
 export default class ViewItemProvider implements CompletionItemProvider {
-  private views: any = null;
+  private views: string[] | null = null;
 
-  private watcher: any = null;
+  private watcher: FileSystemWatcher | null = null;
+
+  private debounceTimer: NodeJS.Timeout | null = null;
 
   constructor() {
     this.syncViews();
@@ -26,20 +28,24 @@ export default class ViewItemProvider implements CompletionItemProvider {
   async provideCompletionItems(
     document: TextDocument,
     position: Position
-  ): Promise<Array<CompletionItem>> {
-    let items: Array<CompletionItem> = [];
+  ): Promise<CompletionItem[]> {
+    const items: CompletionItem[] = [];
 
-    let hasView = new Parser(document, position).hasView();
+    const hasView = new Parser(document, position).hasView();
 
     if (!hasView) {
       return items;
     }
 
-    if (isNull(this.views)) {
+    if (this.views === null) {
       await this.syncViews();
     }
 
-    for (let view of this.views) {
+    if (this.views === null) {
+      return items;
+    }
+
+    for (const view of this.views) {
       const item = new CompletionItem(view, CompletionItemKind.Constant);
 
       item.range = document.getWordRangeAtPosition(
@@ -53,15 +59,27 @@ export default class ViewItemProvider implements CompletionItemProvider {
     return items;
   }
 
-  syncViews() {
-    getViews().then((views) => {
-      this.views = JSON.parse(views);
+  syncViews(): Promise<void> {
+    return getViews().then((views) => {
+      if (views) {
+        try {
+          this.views = JSON.parse(views);
+        } catch {
+          // Silently fail on invalid JSON
+          this.views = null;
+        }
+      }
     });
   }
 
-  watchViews() {
+  watchViews(): void {
+    const workspaceFolder = activeWorkspace();
+    if (!workspaceFolder) {
+      return;
+    }
+
     this.watcher = workspace.createFileSystemWatcher(
-      new RelativePattern(activeWorkspace(), "{,**/}{view,views}/{*,**/*}")
+      new RelativePattern(workspaceFolder, "{,**/}{view,views}/{*,**/*}")
     );
 
     this.watcher.onDidCreate(() => this.onChange());
@@ -69,9 +87,14 @@ export default class ViewItemProvider implements CompletionItemProvider {
     this.watcher.onDidChange(() => this.onChange());
   }
 
-  onChange() {
-    setInterval(() => {
+  onChange(): void {
+    if (this.debounceTimer !== null) {
+      clearTimeout(this.debounceTimer);
+    }
+
+    this.debounceTimer = setTimeout(() => {
       this.syncViews();
-    }, 5000);
+      this.debounceTimer = null;
+    }, 500);
   }
 }

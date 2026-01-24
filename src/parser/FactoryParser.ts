@@ -1,40 +1,49 @@
-import { isUndefined, isNull } from "util";
+type Token = [string, string, number, number] | string;
 
 export default class FactoryParser {
-  tokens: Array<any>;
+  tokens: Token[];
 
-  aliasToken: Array<any> = [];
+  aliasToken: Token[] = [];
 
-  constructor(tokens: Array<any>, aliasToken: Array<any>) {
+  constructor(tokens: Token[], aliasToken: Token[]) {
     this.tokens = tokens;
 
     this.aliasToken = aliasToken;
   }
 
-  getFullClassName() {
+  getFullClassName(): string | null {
     const className = this.getClassNameFromToken();
 
-    if (isNull(className)) {
+    if (className === null || className === "") {
       return null;
     }
 
-    const namespace = this.getUseClasses().find((namespace) => {
-      return namespace.endsWith(className);
+    const namespace = this.getUseClasses().find((ns) => {
+      return ns.endsWith(className);
     });
 
-    if (isUndefined(namespace)) {
+    if (namespace === undefined) {
       return className;
     }
 
     return namespace;
   }
 
-  getClassNameFromToken() {
-    const tokens = this.tokens.slice(this.aliasToken[3]);
+  getClassNameFromToken(): string | null {
+    const firstToken = this.aliasToken[0];
+    if (!Array.isArray(firstToken)) {
+      return null;
+    }
 
-    let classNameTokens: Array<string> = [];
+    const tokens = this.tokens.slice(firstToken[3]);
+
+    const classNameTokens: Token[] = [];
 
     for (const token of tokens) {
+      if (!Array.isArray(token)) {
+        break;
+      }
+
       if (token[0] === "T_STRING" || token[0] === "T_NS_SEPARATOR") {
         classNameTokens.push(token);
       }
@@ -47,12 +56,14 @@ export default class FactoryParser {
     return this.joinClassNameFromTokens(classNameTokens);
   }
 
-  getUseClasses() {
-    let uses: Array<any> = [];
+  getUseClasses(): string[] {
+    const uses: string[] = [];
 
     for (let i = 0; i < this.tokens.length; i++) {
-      if (this.tokens[i][0] === "T_USE") {
-        let use: Array<any> = [];
+      const token = this.tokens[i];
+
+      if (Array.isArray(token) && token[0] === "T_USE") {
+        const use: Token[] = [];
         for (let j = i + 1; j < this.tokens.length; j++) {
           if (this.tokens[j] === ";") {
             break;
@@ -68,10 +79,10 @@ export default class FactoryParser {
     return uses;
   }
 
-  joinClassNameFromTokens(tokens: Array<any>): string {
+  joinClassNameFromTokens(tokens: Token[]): string {
     return tokens
       .map((token) => {
-        return token[1];
+        return Array.isArray(token) ? token[1] : token;
       })
       .join("")
       .trim();
