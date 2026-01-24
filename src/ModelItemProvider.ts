@@ -6,10 +6,15 @@ interface Attributes {
   [key: string]: string[];
 }
 
-export default class ModelItemProvider {
+export default class ModelItemProvider implements vscode.Disposable {
   private attributes: Attributes = {};
 
   private model: string | null = "";
+
+  dispose(): void {
+    this.attributes = {};
+    this.model = null;
+  }
 
   async provideCompletionItems(
     document: vscode.TextDocument,
@@ -31,11 +36,27 @@ export default class ModelItemProvider {
       return items;
     }
 
+    // Get short model name for display
+    const modelShortName = this.model.split("\\").pop() || this.model;
+
     for (const attribute of this.attributes[this.model]) {
       const item = new vscode.CompletionItem(
-        attribute,
-        vscode.CompletionItemKind.Constant
+        {
+          label: attribute,
+          description: modelShortName,
+        },
+        vscode.CompletionItemKind.Field
       );
+
+      item.detail = `${modelShortName}::${attribute}`;
+
+      const docs = new vscode.MarkdownString();
+      docs.appendMarkdown(`**${attribute}**\n\n`);
+      docs.appendMarkdown(`Column from \`${modelShortName}\` model\n\n`);
+      docs.appendCodeblock(`$${modelShortName.toLowerCase()}->${attribute}`, "php");
+      item.documentation = docs;
+
+      item.sortText = attribute;
 
       item.range = document.getWordRangeAtPosition(
         position,

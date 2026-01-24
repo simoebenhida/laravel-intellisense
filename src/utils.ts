@@ -2,6 +2,30 @@ import { workspace, WorkspaceFolder } from "vscode";
 
 type Token = [string, string, number, number] | string;
 
+// Cache the PHP parser instance to avoid repeated require() calls
+let cachedParser: ReturnType<typeof createParser> | null = null;
+
+function createParser() {
+  const engine = require("php-parser");
+
+  return new engine({
+    parser: {
+      extractDoc: true,
+      php7: true,
+    },
+    ast: {
+      withPositions: true,
+    },
+  });
+}
+
+function getParser() {
+  if (!cachedParser) {
+    cachedParser = createParser();
+  }
+  return cachedParser;
+}
+
 export function activeWorkspace(): WorkspaceFolder | undefined {
   if (!Array.isArray(workspace.workspaceFolders)) {
     return undefined;
@@ -25,17 +49,7 @@ export function path(filePath: string): string {
 }
 
 export function phpParserTokens(document: string): Token[] {
-  const engine = require("php-parser");
-
-  const parser = new engine({
-    parser: {
-      extractDoc: true,
-      php7: true,
-    },
-    ast: {
-      withPositions: true,
-    },
-  });
+  const parser = getParser();
 
   return parser
     .tokenGetAll(document)

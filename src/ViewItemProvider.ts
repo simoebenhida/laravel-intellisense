@@ -7,12 +7,14 @@ import {
   RelativePattern,
   workspace,
   FileSystemWatcher,
+  Disposable,
+  MarkdownString,
 } from "vscode";
 import { activeWorkspace } from "./utils";
 import { getViews } from "./php/view";
 import Parser from "./parser/index";
 
-export default class ViewItemProvider implements CompletionItemProvider {
+export default class ViewItemProvider implements CompletionItemProvider, Disposable {
   private views: string[] | null = null;
 
   private watcher: FileSystemWatcher | null = null;
@@ -23,6 +25,20 @@ export default class ViewItemProvider implements CompletionItemProvider {
     this.syncViews();
 
     this.watchViews();
+  }
+
+  dispose(): void {
+    if (this.watcher) {
+      this.watcher.dispose();
+      this.watcher = null;
+    }
+
+    if (this.debounceTimer !== null) {
+      clearTimeout(this.debounceTimer);
+      this.debounceTimer = null;
+    }
+
+    this.views = null;
   }
 
   async provideCompletionItems(
@@ -46,7 +62,21 @@ export default class ViewItemProvider implements CompletionItemProvider {
     }
 
     for (const view of this.views) {
-      const item = new CompletionItem(view, CompletionItemKind.Constant);
+      const item = new CompletionItem(
+        {
+          label: view,
+          description: "View",
+        },
+        CompletionItemKind.File
+      );
+
+      item.detail = `Blade: ${view}`;
+
+      const docs = new MarkdownString();
+      docs.appendMarkdown(`**${view}**\n\n`);
+      docs.appendMarkdown(`Blade view template\n\n`);
+      docs.appendCodeblock(`view('${view}')`, "php");
+      item.documentation = docs;
 
       item.range = document.getWordRangeAtPosition(
         position,

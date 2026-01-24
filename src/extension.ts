@@ -1,4 +1,4 @@
-import { ExtensionContext, languages, commands } from "vscode";
+import { ExtensionContext, languages, commands, Disposable } from "vscode";
 import { hasArtisan, DOCUMENT_SELECTOR, TRIGGER_CHARACTERS } from "./laravel";
 import ViewItemProvider from "./ViewItemProvider";
 import ModelItemProvider from "./ModelItemProvider";
@@ -6,6 +6,10 @@ import LaravelIdeHelper from "./php/laravelIdeHelper";
 import ConfigItemProvider from "./ConfigItemProvider";
 import RouterItemProvider from "./RouterItemProvider";
 import TranslationItemProvider from "./TranslationItemProvider";
+import ValidationItemProvider from "./ValidationItemProvider";
+
+// Store providers for proper disposal
+const providers: Disposable[] = [];
 
 export function activate(context: ExtensionContext) {
   if (!hasArtisan()) {
@@ -18,10 +22,27 @@ export function activate(context: ExtensionContext) {
     )
   );
 
+  const modelProvider = new ModelItemProvider();
+  const viewProvider = new ViewItemProvider();
+  const configProvider = new ConfigItemProvider();
+  const routerProvider = new RouterItemProvider();
+  const translationProvider = new TranslationItemProvider();
+  const validationProvider = new ValidationItemProvider();
+
+  // Store providers for disposal
+  providers.push(
+    modelProvider,
+    viewProvider,
+    configProvider,
+    routerProvider,
+    translationProvider,
+    validationProvider
+  );
+
   context.subscriptions.push(
     languages.registerCompletionItemProvider(
       DOCUMENT_SELECTOR,
-      new ModelItemProvider(),
+      modelProvider,
       ...TRIGGER_CHARACTERS
     )
   );
@@ -29,7 +50,7 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(
     languages.registerCompletionItemProvider(
       DOCUMENT_SELECTOR,
-      new ViewItemProvider(),
+      viewProvider,
       ...TRIGGER_CHARACTERS
     )
   );
@@ -37,7 +58,7 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(
     languages.registerCompletionItemProvider(
       DOCUMENT_SELECTOR,
-      new ConfigItemProvider(),
+      configProvider,
       ...TRIGGER_CHARACTERS
     )
   );
@@ -45,7 +66,7 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(
     languages.registerCompletionItemProvider(
       DOCUMENT_SELECTOR,
-      new RouterItemProvider(),
+      routerProvider,
       ...TRIGGER_CHARACTERS
     )
   );
@@ -53,11 +74,28 @@ export function activate(context: ExtensionContext) {
   context.subscriptions.push(
     languages.registerCompletionItemProvider(
       DOCUMENT_SELECTOR,
-      new TranslationItemProvider(),
+      translationProvider,
       ...TRIGGER_CHARACTERS
+    )
+  );
+
+  // Validation rules - trigger on | and quotes
+  context.subscriptions.push(
+    languages.registerCompletionItemProvider(
+      DOCUMENT_SELECTOR,
+      validationProvider,
+      "|",
+      "'",
+      '"'
     )
   );
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+  // Dispose all providers to prevent memory leaks
+  for (const provider of providers) {
+    provider.dispose();
+  }
+  providers.length = 0;
+}

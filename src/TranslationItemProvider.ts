@@ -2,11 +2,15 @@ import * as vscode from "vscode";
 import Parser from "./parser/index";
 import { getTranslations } from "./php/translation";
 
-export default class TranslationItemProvider {
+export default class TranslationItemProvider implements vscode.Disposable {
   private translations: string[] | null = null;
 
   constructor() {
     this.syncTranslations();
+  }
+
+  dispose(): void {
+    this.translations = null;
   }
 
   async provideCompletionItems(
@@ -30,10 +34,26 @@ export default class TranslationItemProvider {
     }
 
     for (const translation of this.translations) {
+      // Get the translation file name (first part before the dot)
+      const transFile = translation.split(".")[0] || "lang";
+
       const item = new vscode.CompletionItem(
-        translation,
-        vscode.CompletionItemKind.Constant
+        {
+          label: translation,
+          description: transFile,
+        },
+        vscode.CompletionItemKind.Text
       );
+
+      item.detail = `Translation: ${translation}`;
+
+      const docs = new vscode.MarkdownString();
+      docs.appendMarkdown(`**${translation}**\n\n`);
+      docs.appendMarkdown(`Translation key from \`${transFile}.php\`\n\n`);
+      docs.appendCodeblock(`__('${translation}')`, "php");
+      item.documentation = docs;
+
+      item.sortText = translation;
 
       item.range = document.getWordRangeAtPosition(
         position,

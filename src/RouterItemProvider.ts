@@ -2,11 +2,15 @@ import * as vscode from "vscode";
 import Parser from "./parser/index";
 import { getRouterNames } from "./php/router";
 
-export default class RouterItemProvider {
+export default class RouterItemProvider implements vscode.Disposable {
   private routes: string[] | null = null;
 
   constructor() {
     this.syncRoutes();
+  }
+
+  dispose(): void {
+    this.routes = null;
   }
 
   async provideCompletionItems(
@@ -30,10 +34,27 @@ export default class RouterItemProvider {
     }
 
     for (const route of this.routes) {
+      // Get route prefix (e.g., "admin" from "admin.users.index")
+      const routePrefix = route.split(".")[0] || "route";
+
       const item = new vscode.CompletionItem(
-        route,
-        vscode.CompletionItemKind.Constant
+        {
+          label: route,
+          description: "Route",
+        },
+        vscode.CompletionItemKind.Reference
       );
+
+      item.detail = `Route: ${route}`;
+
+      const docs = new vscode.MarkdownString();
+      docs.appendMarkdown(`**${route}**\n\n`);
+      docs.appendMarkdown(`Named route\n\n`);
+      docs.appendCodeblock(`route('${route}')`, "php");
+      item.documentation = docs;
+
+      // Sort by prefix then name
+      item.sortText = `${routePrefix}_${route}`;
 
       item.range = document.getWordRangeAtPosition(
         position,

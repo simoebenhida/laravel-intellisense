@@ -2,11 +2,15 @@ import * as vscode from "vscode";
 import Parser from "./parser/index";
 import { getConfigElements } from "./php/config";
 
-export default class ConfigItemProvider {
+export default class ConfigItemProvider implements vscode.Disposable {
   private elements: string[] | null = null;
 
   constructor() {
     this.syncConfig();
+  }
+
+  dispose(): void {
+    this.elements = null;
   }
 
   async provideCompletionItems(
@@ -30,10 +34,26 @@ export default class ConfigItemProvider {
     }
 
     for (const element of this.elements) {
+      // Get the config file name (first part before the dot)
+      const configFile = element.split(".")[0] || "config";
+
       const item = new vscode.CompletionItem(
-        element,
-        vscode.CompletionItemKind.Constant
+        {
+          label: element,
+          description: configFile,
+        },
+        vscode.CompletionItemKind.Property
       );
+
+      item.detail = `Config: ${element}`;
+
+      const docs = new vscode.MarkdownString();
+      docs.appendMarkdown(`**${element}**\n\n`);
+      docs.appendMarkdown(`Configuration key from \`${configFile}.php\`\n\n`);
+      docs.appendCodeblock(`config('${element}')`, "php");
+      item.documentation = docs;
+
+      item.sortText = element;
 
       item.range = document.getWordRangeAtPosition(
         position,
