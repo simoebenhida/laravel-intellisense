@@ -1,6 +1,8 @@
 import { Position } from "vscode";
 
-type Token = [string, string, number, number] | string;
+// Token can be [type, value, line, index] or a single character like "(" or ";"
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Token = Array<any> | string;
 
 export default class Handler {
   tokens: Token[];
@@ -17,12 +19,12 @@ export default class Handler {
     this.aliases = aliases;
   }
 
-  getEloquentAliasToken(): Token[] {
+  getEloquentAliasToken(): Token {
     return this.getAliasToken();
   }
 
-  getResourceAliasToken(): Token[] {
-    let aliasToken: Token[] = [];
+  getResourceAliasToken(): Token {
+    let aliasToken: Token = [];
 
     for (let i = 0; i < this.tokens.length; i++) {
       const token = this.tokens[i];
@@ -36,7 +38,7 @@ export default class Handler {
         token[0] === "T_STRING" &&
         token[1].endsWith("Resource")
       ) {
-        aliasToken = [token];
+        aliasToken = token;
       }
 
       if (
@@ -49,7 +51,7 @@ export default class Handler {
     }
 
     const lineTokens = this.tokens
-      .filter((token): token is [string, string, number, number] => {
+      .filter((token): token is Array<any> => {
         return Array.isArray(token) && token[2] === this.position.line + 1;
       })
       .reverse();
@@ -78,11 +80,11 @@ export default class Handler {
     return aliasToken;
   }
 
-  getFactoryAliasToken(): Token[] {
-    let aliasToken: Token[] = [];
+  getFactoryAliasToken(): Token {
+    let aliasToken: Token = [];
 
     const lineTokens = this.tokens
-      .filter((token): token is [string, string, number, number] => {
+      .filter((token): token is Array<any> => {
         return Array.isArray(token) && token[2] === this.position.line + 1;
       })
       .reverse();
@@ -106,9 +108,7 @@ export default class Handler {
 
     const beforeTokens = this.tokens
       .slice(0, lineTokens[0][3])
-      .filter((token): token is [string, string, number, number] =>
-        Array.isArray(token)
-      )
+      .filter((token): token is Array<any> => Array.isArray(token))
       .reverse();
 
     for (let i = 0; i < beforeTokens.length; i++) {
@@ -121,7 +121,7 @@ export default class Handler {
         beforeTokens[i + 3][0] === "T_VARIABLE" &&
         beforeTokens[i + 3][1] === "$factory"
       ) {
-        aliasToken = [beforeTokens[i]];
+        aliasToken = beforeTokens[i];
         break;
       }
     }
@@ -143,8 +143,7 @@ export default class Handler {
       return false;
     }
 
-    const firstToken = tokens[0];
-    if (Array.isArray(firstToken) && this.aliases.includes(firstToken[1])) {
+    if (Array.isArray(tokens[0]) && this.aliases.includes(tokens[0][1])) {
       return true;
     }
 
@@ -155,18 +154,35 @@ export default class Handler {
     return false;
   }
 
-  getAliasToken(): Token[] {
-    let aliasToken: Token[] = [];
+  getAliasToken(): Token {
+    let aliasToken: Token = [];
 
     const tokens = this.tokensOnTheSameLine();
 
-    // Remove TRIGGER_CHARACTERS
-    tokens.shift();
+    // Walk backwards through tokens to find the method name
+    // Skip: trigger characters, strings, punctuation like ( ) ,
+    for (const token of tokens) {
+      // Skip non-array tokens (punctuation like '(', ')', ',', etc.)
+      if (!Array.isArray(token)) {
+        continue;
+      }
 
-    const alias = tokens.shift();
+      // Skip string literals (the trigger character context)
+      if (
+        token[0] === "T_CONSTANT_ENCAPSED_STRING" ||
+        token[0] === "T_ENCAPSED_AND_WHITESPACE"
+      ) {
+        continue;
+      }
 
-    if (Array.isArray(alias) && this.aliases.includes(alias[1])) {
-      aliasToken = [alias];
+      // Found a potential method name - check if it's an alias
+      if (token[0] === "T_STRING" && this.aliases.includes(token[1])) {
+        aliasToken = token;
+        break;
+      }
+
+      // If we hit something else (variable, operator, etc.), stop looking
+      break;
     }
 
     return aliasToken;
@@ -174,7 +190,7 @@ export default class Handler {
 
   tokensOnTheSameLine(): Token[] {
     return this.tokens
-      .filter((token): token is [string, string, number, number] => {
+      .filter((token): token is Array<any> => {
         return Array.isArray(token) && token[2] === this.position.line + 1;
       })
       .reverse();

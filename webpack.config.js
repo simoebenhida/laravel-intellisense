@@ -30,10 +30,11 @@ const config = {
     module: {
         rules: [{
             test: /\.ts$/,
-            exclude: /node_modules/,
+            exclude: [/node_modules/, /test/],
             use: [{
                 loader: 'ts-loader',
                 options: {
+                    configFile: 'tsconfig.build.json',
                     compilerOptions: {
                         "module": "es6" // override `tsconfig.json` so that TypeScript emits native JavaScript modules.
                     }

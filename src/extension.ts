@@ -7,6 +7,8 @@ import ConfigItemProvider from "./ConfigItemProvider";
 import RouterItemProvider from "./RouterItemProvider";
 import TranslationItemProvider from "./TranslationItemProvider";
 import ValidationItemProvider from "./ValidationItemProvider";
+import DefinitionProvider from "./DefinitionProvider";
+import HoverProvider from "./HoverProvider";
 
 // Store providers for proper disposal
 const providers: Disposable[] = [];
@@ -28,6 +30,8 @@ export function activate(context: ExtensionContext) {
   const routerProvider = new RouterItemProvider();
   const translationProvider = new TranslationItemProvider();
   const validationProvider = new ValidationItemProvider();
+  const definitionProvider = new DefinitionProvider();
+  const hoverProvider = new HoverProvider();
 
   // Store providers for disposal
   providers.push(
@@ -36,7 +40,9 @@ export function activate(context: ExtensionContext) {
     configProvider,
     routerProvider,
     translationProvider,
-    validationProvider
+    validationProvider,
+    definitionProvider,
+    hoverProvider
   );
 
   context.subscriptions.push(
@@ -88,6 +94,16 @@ export function activate(context: ExtensionContext) {
       "'",
       '"'
     )
+  );
+
+  // Go to Definition - Cmd/Ctrl+Click on views, routes, config, translations
+  context.subscriptions.push(
+    languages.registerDefinitionProvider(DOCUMENT_SELECTOR, definitionProvider)
+  );
+
+  // Hover documentation
+  context.subscriptions.push(
+    languages.registerHoverProvider(DOCUMENT_SELECTOR, hoverProvider)
   );
 }
 
