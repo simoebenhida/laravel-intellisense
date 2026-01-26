@@ -4,7 +4,7 @@ All notable changes to the "laravel-intellisense" extension will be documented i
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [0.3.2] - 2026-01-26
+## [0.4.0] - 2026-01-26
 
 ### Added
 - **Go to Definition** - Cmd/Ctrl+Click to jump to definitions
